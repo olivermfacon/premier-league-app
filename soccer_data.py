@@ -18,7 +18,8 @@ def get_menu_option():
     return input("CHOOSE AN OPTION BELOW BY ENTERING THE MENU NUMBER: ")
     print()
 
-def next_five(response):
+def next_five(matches):
+    print(matches)
     print()
     print("THE NEXT FIVE SCHEDULED GAMES:")
     print()
@@ -26,7 +27,8 @@ def next_five(response):
     while(x < 5):
         match_date = matches[x]["utcDate"]
         match_date = format_date(match_date)
-        print(matches[x]["homeTeam"]["name"] + " vs " + matches[x]["awayTeam"]["name"] + " (" + match_date + ")")
+        print("(" + match_date + ") Matchday " + str(matches[x]["matchday"]))
+        print("\t" + matches[x]["homeTeam"]["name"] + " vs " + matches[x]["awayTeam"]["name"])
         x += 1
     print()
 
@@ -42,22 +44,23 @@ def last_five(matches, requested_team):
         if matches[finished_games - x]["score"]["winner"] == "HOME_TEAM":
             home_team = matches[finished_games - x]["homeTeam"]["name"].upper()
             if home_team == requested_team.upper():
-                result = "W"
+                result = "WIN"
             else:
-                result = "L"
+                result = "LOSS"
             away_team = matches[finished_games - x]["awayTeam"]["name"]
         elif matches[finished_games - x]["score"]["winner"] == "AWAY_TEAM":
             home_team = matches[finished_games - x]["homeTeam"]["name"]
             away_team = matches[finished_games - x]["awayTeam"]["name"].upper()
             if away_team == requested_team.upper():
-                result = "W"
+                result = "WIN"
             else:
-                result = "L"
+                result = "LOSS"
         else:
             home_team = matches[finished_games - x]["homeTeam"]["name"]
             away_team = matches[finished_games - x]["awayTeam"]["name"]
-            result = "D"
-        print(home_team + " " + str(matches[finished_games - x]["score"]["fullTime"]["homeTeam"]) + " vs " + away_team + " " + str(matches[finished_games - x]["score"]["fullTime"]["awayTeam"]) + " (" + match_date + ") " + result)
+            result = "DRAW"
+        print("(" + match_date + ")" + str(matches[x]["matchday"]))
+        print("\t" +home_team + " " + str(matches[finished_games - x]["score"]["fullTime"]["homeTeam"]) + " vs " + away_team + " " + str(matches[finished_games - x]["score"]["fullTime"]["awayTeam"]) + "  " + result)
         x += 1
 
 def whole_season(matches, requested_team):
@@ -81,11 +84,13 @@ def whole_season(matches, requested_team):
             else:
                 home_team = match["homeTeam"]["name"]
                 away_team = match["awayTeam"]["name"]
-            print(home_team + " " + str(match["score"]["fullTime"]["homeTeam"]) + " vs " + away_team + " " + str(match["score"]["fullTime"]["awayTeam"]) + " (" + match_date + ")")
+            print("(" + match_date + ") Matchday " + str(match["matchday"]))
+            print("\t" + home_team + " " + str(match["score"]["fullTime"]["homeTeam"]) + " vs " + away_team + " " + str(match["score"]["fullTime"]["awayTeam"]) + "(" + match_date + ")")
         else:
-            print(match["homeTeam"]["name"] + " vs " + match["awayTeam"]["name"] + " (" + match_date + ")")
+            print("(" + match_date + ") Matchday " + str(match["matchday"]))
+            print("\t" + match["homeTeam"]["name"] + " vs " + match["awayTeam"]["name"])
         if(match["status"] == "POSTPONED"):
-            print("THE ABOVE GAME IS POSTPONED")
+            print("THE ABOVE FIXTURE IS POSTPONED")
         if match["status"] == "FINISHED" and (matches[x+1]["status"] == "SCHEDULED" or matches[x+1]["status"] == "POSTPONED") and x != 37:
             print()
             print("-----------------")
@@ -106,11 +111,11 @@ def prem_table(standings, selected_team_id):
         else:
             print(str(team["position"]) + ".\t" + team["team"]["name"] + " (" + str(team["points"]) + "pts)")
     print()
+
+
 team_names = []
 short_names = []
 tla = []
-
-
 
 api_key = os.environ.get("API_KEY")
 
@@ -119,13 +124,12 @@ headers = { 'X-Auth-Token': '3d0a31585ed447b2899c048748e26386' }
 connection.request('GET', '/v2/competitions/PL/teams', None, headers )
 response = json.loads(connection.getresponse().read().decode())
 
-print("-----------------------------")
-print("PREMIER LEAGUE SQUAD TRACKER")
-print("-----------------------------")
+print("------------------------")
+print("PREMIER LEAGUE TEAM DATA")
+print("------------------------")
 
 y = 1
 for team in response["teams"]:
-    print(y)
     y += 1
     team_names.append(team["name"])
     short_names.append(team["shortName"])
@@ -137,8 +141,6 @@ x=0
 while valid_team == False:
     requested_team = input("ENTER THE NAME OF YOUR FAVORITE PREMIER LEAGUE TEAM: ").lower()
     for team in response["teams"]:
-        print(requested_team)
-        print(team_names[x].lower())
         if requested_team == team_names[x].lower() or requested_team == short_names[x].lower() or requested_team == tla[x].lower():
             selected_team_id = team["id"]
             valid_team = True
@@ -180,8 +182,6 @@ elif menu_selection == "3":
 elif menu_selection == "4":
     connection.request('GET', '/v2/competitions/PL/standings', None, headers )
     response = json.loads(connection.getresponse().read().decode())
-    print(response)
     standings = response["standings"][0]["table"]
-    print(standings)
     prem_table(standings,selected_team_id)
 
