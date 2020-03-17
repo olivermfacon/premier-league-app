@@ -62,7 +62,6 @@ def last_five(response, requested_team):
         x += 1
 
 def whole_season(response, requested_team):
-    print(response)
     x=0
     if response["matches"][x]["status"] == "FINISHED":
         print()
@@ -71,7 +70,7 @@ def whole_season(response, requested_team):
         print("------------")
         print()
     for match in response["matches"]:
-        if match["competition"] == "Premier League"
+        if match["competition"]["name"] == "Premier League":
             match_date = match["utcDate"]
             match_date = format_date(match_date)
             if match["status"] == "FINISHED":
@@ -95,35 +94,50 @@ def whole_season(response, requested_team):
                 print("UPCOMING FIXTURES")
                 print("------------")
                 print()
-            x += 1
+        x += 1
     
 
-teams = []
+team_names = []
+short_names = []
+tla = []
+
+
 
 api_key = os.environ.get("API_KEY")
 
 connection = http.client.HTTPConnection('api.football-data.org')
 headers = { 'X-Auth-Token': '3d0a31585ed447b2899c048748e26386' }
-connection.request('GET', '/v2/teams', None, headers )
+connection.request('GET', '/v2/competitions/PL/teams', None, headers )
 response = json.loads(connection.getresponse().read().decode())
-
+print(response)
 print("-----------------------------")
 print("PREMIER LEAGUE SQUAD TRACKER")
 print("-----------------------------")
 
+y = 1
 for team in response["teams"]:
-    teams.append(team["name"])
+    print(y)
+    y += 1
+    team_names.append(team["name"])
+    short_names.append(team["shortName"])
+    tla.append(team["tla"])
 
 valid_team = False
 
+x=0
+
 while valid_team == False:
-    requested_team = input("ENTER THE NAME OF YOUR FAVORITE PREMIER LEAGUE TEAM: ")
+    requested_team = input("ENTER THE NAME OF YOUR FAVORITE PREMIER LEAGUE TEAM: ").lower()
     for team in response["teams"]:
-        if requested_team == team["name"]:
+        print(requested_team)
+        print(team_names[x].lower())
+        if requested_team == team_names[x].lower() or requested_team == short_names[x].lower() or requested_team == tla[x].lower():
             selected_team_id = team["id"]
             valid_team = True
+        x += 1
     if valid_team == False:
         print("Invalid team entry")
+        x = 0
 
 print()
 
