@@ -17,6 +17,29 @@ def get_menu_option():
     print()
     return input("CHOOSE AN OPTION BELOW BY ENTERING THE MENU NUMBER: ")
 
+def match_info(match):
+    match_information = []
+    print(match["homeTeam"]["name"])
+    if match["score"]["winner"] == "HOME_TEAM":
+        match_information.append(match["homeTeam"]["name"].upper())
+        match_information.append(match["awayTeam"]["name"])
+        if match_information[0] == requested_team:
+            match_information.append("WIN")
+        else:
+            match_information.append("LOSS")
+    elif match["score"]["winner"] == "AWAY_TEAM":
+        match_information.append(match["homeTeam"]["name"])
+        match_information.append(match["awayTeam"]["name"].upper())
+        if match_information[1] == requested_team:
+            match_information.append("WIN")
+        else:
+            match_information.append("LOSS")
+    else:
+        match_information.append(match["homeTeam"]["name"])
+        match_information.append(match["awayTeam"]["name"])
+        match_information.append("DRAW")
+    return match_information
+
 def next_five(matches):
     print()
     print("------------------------------")
@@ -30,6 +53,9 @@ def next_five(matches):
         print("(" + match_date + ") Matchday " + str(matches[x]["matchday"]))
         print("\t" + matches[x]["homeTeam"]["name"] + " vs " + matches[x]["awayTeam"]["name"])
         print()
+        if matches[x]["matchday"] == 38:
+            print("---> END OF SEASON <---")
+            break
         x += 1
     print()
 
@@ -44,26 +70,9 @@ def last_five(matches, requested_team):
     while(x > 0):
         match_date = matches[finished_games - x]["utcDate"]
         match_date = format_date(match_date)
-        if matches[finished_games - x]["score"]["winner"] == "HOME_TEAM":
-            home_team = matches[finished_games - x]["homeTeam"]["name"].upper()
-            if home_team == requested_team:
-                result = "WIN"
-            else:
-                result = "LOSS"
-            away_team = matches[finished_games - x]["awayTeam"]["name"]
-        elif matches[finished_games - x]["score"]["winner"] == "AWAY_TEAM":
-            home_team = matches[finished_games - x]["homeTeam"]["name"]
-            away_team = matches[finished_games - x]["awayTeam"]["name"].upper()
-            if away_team == requested_team:
-                result = "WIN"
-            else:
-                result = "LOSS"
-        else:
-            home_team = matches[finished_games - x]["homeTeam"]["name"]
-            away_team = matches[finished_games - x]["awayTeam"]["name"]
-            result = "DRAW"
-        print("(" + match_date + ") Matchday " + str(matches[finished_games - x]["matchday"]) + " - " + result)
-        print("\t" +home_team + " " + str(matches[finished_games - x]["score"]["fullTime"]["homeTeam"]) + " vs " + away_team + " " + str(matches[finished_games - x]["score"]["fullTime"]["awayTeam"]))
+        match_information = match_info(matches[finished_games - x])
+        print("(" + match_date + ") Matchday " + str(matches[finished_games - x]["matchday"]) + " - " + match_information[2])
+        print("\t" + match_information[0] + " " + str(matches[finished_games - x]["score"]["fullTime"]["homeTeam"]) + " vs " + match_information[1] + " " + str(matches[finished_games - x]["score"]["fullTime"]["awayTeam"]))
         print()
         x -= 1
 
@@ -79,31 +88,16 @@ def whole_season(matches, requested_team):
         match_date = match["utcDate"]
         match_date = format_date(match_date)
         if match["status"] == "FINISHED":
-            if match["score"]["winner"] == "HOME_TEAM":
-                home_team = match["homeTeam"]["name"].upper()
-                if home_team == requested_team:
-                    result = "WIN"
-                else:
-                    result = "LOSS"
-                away_team = match["awayTeam"]["name"]
-            elif match["score"]["winner"] == "AWAY_TEAM":
-                home_team = match["homeTeam"]["name"]
-                away_team = match["awayTeam"]["name"].upper()
-                if away_team == requested_team:
-                    result = "WIN"
-                else:
-                    result = "LOSS"
-            else:
-                home_team = match["homeTeam"]["name"]
-                away_team = match["awayTeam"]["name"]
-                result = "DRAW"
-            print("(" + match_date + ") Matchday " + str(match["matchday"]) + " - " + result)
-            print("\t" + home_team + " " + str(match["score"]["fullTime"]["homeTeam"]) + " vs " + away_team + " " + str(match["score"]["fullTime"]["awayTeam"]))
+            match_information = match_info(match)
+            print("(" + match_date + ") Matchday " + str(match["matchday"]) + " - " + match_information[2])
+            print("\t" + match_information[0] + " " + str(match["score"]["fullTime"]["homeTeam"]) + " vs " + match_information[1] + " " + str(match["score"]["fullTime"]["awayTeam"]))
         else:
             print("(" + match_date + ") Matchday " + str(match["matchday"]))
             print("\t" + match["homeTeam"]["name"] + " vs " + match["awayTeam"]["name"])
         if(match["status"] == "POSTPONED"):
             print("\t---> THIS FIXTURE IS POSTPONED <---")
+        if(match["status"] == "CANCELLED"):
+            print("\t---> THIS FIXTURE IS CANCELLED <---")
         print()
         if match["status"] == "FINISHED" and (matches[x+1]["status"] == "SCHEDULED" or matches[x+1]["status"] == "POSTPONED") and x != 37:
             print()
