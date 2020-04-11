@@ -11,15 +11,14 @@ def get_menu_option():
     print("2. View their last 5 fixtures...")
     print("3. View their entire current season...")
     print("4. View their position in the table...")
-    print("5. View the odds on their next game...")
-    print("6. View the club's most recent lineup...")
-    print("7. View season statistics...")
+    print("5. View the club roster...")
+    print("6. View season statistics...")
+    print("7. View team information...")
     print()
     return input("CHOOSE AN OPTION BELOW BY ENTERING THE MENU NUMBER: ")
 
 def match_info(match):
     match_information = []
-    print(match["homeTeam"]["name"])
     if match["score"]["winner"] == "HOME_TEAM":
         match_information.append(match["homeTeam"]["name"].upper())
         match_information.append(match["awayTeam"]["name"])
@@ -121,15 +120,83 @@ def prem_table(standings, selected_team_id):
             print(str(team["position"]) + ".\t" + team["team"]["name"] + " (" + str(team["points"]) + "pts)")
     print()
 
+def display_squad(squad):
+    print()
+    goalkeepers = []
+    defenders = []
+    midfielders = []
+    attackers = []
+    #print(squad)
+    for person in squad:
+        if person["position"] == "Goalkeeper":
+            goalkeepers.append(person["name"])
+        elif person["position"] == "Defender":
+            defenders.append(person["name"])
+        elif person["position"] == "Midfielder":
+            midfielders.append(person["name"])
+        elif person["position"] == "Attacker":
+            attackers.append(person["name"])
+        elif person["role"] == "COACH":
+            print("COACH: " + person["name"] + "\n")
+    print("GOALKEEPERS\n")
+    for keeper in goalkeepers:
+        print(f"\t{keeper}")
+    print(f"\nDEFENDERS\n")
+    for defender in defenders:
+        print(f"\t{defender}")
+    print(f"\nMIDFIELDERS\n")
+    for midfielder in midfielders:
+        print(f"\t{midfielder}")
+    print(f"\nATTACKERS\n")
+    for attacker in attackers:
+        print(f"\t{attacker}")
+    print()
+
+def season_statistics(team_stats):
+    win_percentage = (team_stats["won"]/team_stats["playedGames"])*100
+    if team_stats["position"] == 1:
+        place = "st"
+    elif team_stats["position"] == 2:
+        place = "nd"
+    elif team_stats["position"] == 3:
+        place = "rd"
+    else:
+        place = "th"
+    print("\n" + team_stats["team"]["name"] + " Season Statistics\n")
+    print("\tLeague Standing: " + str(team_stats["position"]) + place)
+    print("\tPoints: " + str(team_stats["points"]) + "\n")
+    print("\tGames Played: " + str(team_stats["playedGames"]))
+    print("\tWins: " + str(team_stats["won"]))
+    print("\tDraws: " + str(team_stats["draw"]))
+    print("\tLosses: " + str(team_stats["lost"]))
+    print("\tWin Percentage: " + str(win_percentage)[:5] + "%\n")
+    print("\tGoals Scored: " + str(team_stats["goalsFor"]))
+    print("\tGoals Conceded: " + str(team_stats["goalsAgainst"]))
+    print("\tGoal Difference: " + str(team_stats["goalDifference"]) + "\n")
+
+
+
+def team_info(team):
+    print("\n" + team["name"].upper() + "\n")
+    print("\t" + "FOUNDED: " + str(team["founded"]))
+    print("\t" + "VENUE: " + team["venue"])
+    print("\t" + "CLUB COLORS: " + team["clubColors"] + "\n")
+    print("\t" + "ACTIVE COMPETITIONS:")
+    for competition in team["activeCompetitions"]:
+        print("\t   " + competition["name"])
+    print("\n\t" + "ADDRESS: " + team["address"])
+    print("\t" + "PHONE: " + team["phone"])
+    print("\t" + "WEBSITE: " + team["website"])
+    print("\t" + "EMAIL: " + team["email"] + "\n")
+
 
 team_names = []
 short_names = []
 tla = []
 
 api_key = os.environ.get("API_KEY")
-
-connection = http.client.HTTPConnection('api.football-data.org')
-headers = { 'X-Auth-Token': '3d0a31585ed447b2899c048748e26386' }
+connection = http.client.HTTPConnection('api.football-data.org') #https://www.football-data.org/documentation/samples
+headers = { 'X-Auth-Token': '3d0a31585ed447b2899c048748e26386' } #
 connection.request('GET', '/v2/competitions/PL/teams', None, headers )
 response = json.loads(connection.getresponse().read().decode())
 
@@ -198,5 +265,29 @@ while menu_selection!="done":
         standings = response["standings"][0]["table"]
         prem_table(standings,selected_team_id)
 
+    elif menu_selection == "5":
+        connection.request('GET', f'/v2/teams/{selected_team_id}', None, headers )
+        response = json.loads(connection.getresponse().read().decode())
+        squad = response["squad"]
+        display_squad(squad)
+
+    elif menu_selection == "6":
+        connection.request('GET', '/v2/competitions/PL/standings', None, headers )
+        response = json.loads(connection.getresponse().read().decode())
+        table = response["standings"][0]["table"]
+        x = 0
+        for team in table:
+            if team["team"]["name"].upper() == requested_team:
+                season_statistics(table[x])
+            x += 1
+        
+    elif menu_selection == "7":
+        connection.request('GET', f'/v2/teams/{selected_team_id}', None, headers )
+        response = json.loads(connection.getresponse().read().decode())
+        team = response
+        team_info(team)
+
     menu_selection = get_menu_option()
+
+    
 
