@@ -2,6 +2,7 @@ import os
 import json
 import http.client
 import requests
+from dotenv import load_dotenv
 
 def format_date(match_date):
     return match_date[0:10]
@@ -174,8 +175,6 @@ def season_statistics(team_stats):
     print("\tGoals Conceded: " + str(team_stats["goalsAgainst"]))
     print("\tGoal Difference: " + str(team_stats["goalDifference"]) + "\n")
 
-
-
 def team_info(team):
     print("\n" + team["name"].upper() + "\n")
     print("\t" + "FOUNDED: " + str(team["founded"]))
@@ -194,12 +193,14 @@ team_names = []
 short_names = []
 tla = []
 
+load_dotenv()
+
 api_key = os.environ.get("API_KEY")
 connection = http.client.HTTPConnection('api.football-data.org') #https://www.football-data.org/documentation/samples
-headers = { 'X-Auth-Token': '3d0a31585ed447b2899c048748e26386' } #
+headers = { 'X-Auth-Token': api_key } #
 connection.request('GET', '/v2/competitions/PL/teams', None, headers )
 response = json.loads(connection.getresponse().read().decode())
-
+#3d0a31585ed447b2899c048748e26386
 print("---------------------------------------------")
 print("SOCCER TEAM PROGRESS TRACKER (Premier League)")
 print("---------------------------------------------")
@@ -291,3 +292,4 @@ while menu_selection!="done":
 
     
 
+#pip install -U python-dotenv
