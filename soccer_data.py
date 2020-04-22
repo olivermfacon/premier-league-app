@@ -2,6 +2,9 @@ import os
 import json
 import http.client
 import requests
+import sendgrid
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 from dotenv import load_dotenv
 
 def format_date(match_date):
@@ -15,6 +18,7 @@ def get_menu_option():
     print("5. View the club roster...")
     print("6. View season statistics...")
     print("7. View team information...")
+    print("8. Sign up to your club's weekly newsletter...")
     print()
     return input("CHOOSE AN OPTION BELOW BY ENTERING THE MENU NUMBER: ")
 
@@ -188,6 +192,17 @@ def team_info(team):
     print("\t" + "WEBSITE: " + team["website"])
     print("\t" + "EMAIL: " + team["email"] + "\n")
 
+def newsletter():
+    print(MY_EMAIL_ADDRESS)
+    message = Mail(
+    from_email = MY_EMAIL_ADDRESS,
+    to_emails = MY_EMAIL_ADDRESS,
+    subject = 'Hello World from the SendGrid Python Library!',
+    html_content = 'Hello, Email!'
+    )
+    sg = SendGridAPIClient(SENDGRID_API_KEY)
+    response = sg.send(message)
+    print(response.status_code, response.body, response.headers)
 
 team_names = []
 short_names = []
@@ -195,7 +210,10 @@ tla = []
 
 load_dotenv()
 
-api_key = os.environ.get("API_KEY")
+MY_EMAIL_ADDRESS = os.environ.get("MY_EMAIL_ADDRESS")
+SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
+
+api_key = os.environ.get("FOOTY_API_KEY")
 connection = http.client.HTTPConnection('api.football-data.org') #https://www.football-data.org/documentation/samples
 headers = { 'X-Auth-Token': api_key } 
 connection.request('GET', '/v2/competitions/PL/teams', None, headers )
@@ -287,6 +305,9 @@ while menu_selection!="done":
         response = json.loads(connection.getresponse().read().decode())
         team = response
         team_info(team)
+    
+    elif menu_selection == "8":
+        newsletter()
 
     menu_selection = get_menu_option()
 
