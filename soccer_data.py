@@ -197,10 +197,10 @@ load_dotenv()
 
 api_key = os.environ.get("API_KEY")
 connection = http.client.HTTPConnection('api.football-data.org') #https://www.football-data.org/documentation/samples
-headers = { 'X-Auth-Token': api_key } #
+headers = { 'X-Auth-Token': api_key } 
 connection.request('GET', '/v2/competitions/PL/teams', None, headers )
 response = json.loads(connection.getresponse().read().decode())
-#3d0a31585ed447b2899c048748e26386
+
 print("---------------------------------------------")
 print("SOCCER TEAM PROGRESS TRACKER (Premier League)")
 print("---------------------------------------------")
