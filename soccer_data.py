@@ -2,7 +2,7 @@ import os
 import json
 import http.client
 import requests
-#import sendgrid
+import sendgrid
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from dotenv import load_dotenv
