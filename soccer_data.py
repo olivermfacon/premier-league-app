@@ -2,7 +2,7 @@ import os
 import json
 import http.client
 import requests
-import sendgrid
+#import sendgrid
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from dotenv import load_dotenv
@@ -200,23 +200,24 @@ def team_info(team):
 
 def newsletter():
     message = Mail(
-    from_email = MY_EMAIL_ADDRESS,
-    to_emails = MY_EMAIL_ADDRESS,
-    subject = 'Hello World from the SendGrid Python Library!',
-    html_content = 'hello'
-    )
-    sg = SendGridAPIClient(SENDGRID_API_KEY)
-    response = sg.send(message)
-    print(response.status_code, response.body, response.headers)
+    from_email=os.environ.get("MY_EMAIL_ADDRESS"),
+    to_emails=os.environ.get("MY_EMAIL_ADDRESS"),
+    subject='Sending with Twilio SendGrid is Fun',
+    html_content='<strong>and easy to do anywhere, even with Python</strong>')
+    try:
+        sendgrid_client = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+        response = sendgrid_client.send(message)
+        print(response.status_code)
+        print(response.body)
+        print(response.headers)
+    except Exception as e:
+        print(e)
 
 team_names = []
 short_names = []
 tla = []
 
 load_dotenv()
-
-MY_EMAIL_ADDRESS = os.environ.get("MY_EMAIL_ADDRESS")
-SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY")
 
 api_key = os.environ.get("FOOTY_API_KEY")
 connection = http.client.HTTPConnection('api.football-data.org') #https://www.football-data.org/documentation/samples
