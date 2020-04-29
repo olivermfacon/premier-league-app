@@ -2,9 +2,10 @@ import os
 import json
 import http.client
 import requests
-import sendgrid
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
+from mailjet_rest import Client
+#import sendgrid
+#from sendgrid import SendGridAPIClient
+#from sendgrid.helpers.mail import Mail
 from dotenv import load_dotenv
 
 def format_date(match_date):
@@ -198,20 +199,47 @@ def team_info(team):
     print("\t" + "WEBSITE: " + team["website"])
     print("\t" + "EMAIL: " + team["email"] + "\n")
 
-def newsletter():
-    message = Mail(
-    from_email=os.environ.get("MY_EMAIL_ADDRESS"),
-    to_emails=os.environ.get("MY_EMAIL_ADDRESS"),
-    subject='Sending with Twilio SendGrid is Fun',
-    html_content='<strong>and easy to do anywhere, even with Python</strong>')
-    try:
-        sendgrid_client = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
-        response = sendgrid_client.send(message)
-        print(response.status_code)
-        print(response.body)
-        print(response.headers)
-    except Exception as e:
-        print(e)
+def newsletter(content):
+    email_api_key = os.environ.get("API_KEY")
+    api_secret = os.environ.get("API_SECRET")
+    mailjet = Client(auth=(email_api_key, api_secret), version='v3.1')
+    data = {
+    'Messages': [
+        {
+        "From": {
+            "Email": "omf11@georgetown.edu",
+            "Name": "Oliver"
+        },
+        "To": [
+            {
+            "Email": "omf11@georgetown.edu",
+            "Name": "Oliver"
+            }
+        ],
+        "Subject": "Greetings from Mailjet.",
+        "TextPart": "My first Mailjet email",
+        "HTMLPart": content,
+        "CustomID": "AppGettingStartedTest"
+        }
+    ]
+    }
+    result = mailjet.send.create(data=data)
+    print(result.status_code)
+    print(result.json())
+
+    #message = Mail(
+    #from_email=os.environ.get("MY_EMAIL_ADDRESS"),
+    #to_emails="omf11@georgetown.edu",
+    #subject='Sending with Twilio SendGrid is Fun',
+    #html_content='<strong>and easy to do anywhere, even with Python</strong>')
+    #try:
+    #    sendgrid_client = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+    #    response = sendgrid_client.send(message)
+    #    print(response.status_code)
+    #    print(response.body)
+    #    print(response.headers)
+    #except Exception as e:
+    #    print(e)
 
 team_names = []
 short_names = []
@@ -313,13 +341,13 @@ while menu_selection!="done":
         team_info(team)
     
     elif menu_selection == "8":
-       #connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=FINISHED', None, headers )
-       #response = json.loads(connection.getresponse().read().decode())
-       #for match in response["matches"]:
-       #    if match["competition"]["name"] == "Premier League":
-       #        matches.append(match)
-       #content = last_five(matches, requested_team)
-        newsletter()
+        connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=FINISHED', None, headers )
+        response = json.loads(connection.getresponse().read().decode())
+        for match in response["matches"]:
+            if match["competition"]["name"] == "Premier League":
+               matches.append(match)
+        content = last_five(matches, requested_team)
+        newsletter(content)
 
     menu_selection = get_menu_option()
 
