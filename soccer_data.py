@@ -5,6 +5,31 @@ import requests
 from mailjet_rest import Client
 from dotenv import load_dotenv
 
+def club_colors(selected_team_id):
+    basic_colors = ["Red", "Blue", "Green", "Yellow"]
+    colors = []
+    connection.request('GET', f'/v2/teams/{selected_team_id}', None, headers )
+    response = json.loads(connection.getresponse().read().decode())
+    color = response["clubColors"]
+    print(color)
+    y=0
+    for char in color:
+        if char == '/':
+            colors.append(color[:y-1])
+            colors.append(color[y+2:])
+        y+=1
+    for color in basic_colors:
+        if color in colors[0]:
+            colors[0] = color
+        if color in colors[1]:
+            colors[1] = color
+    if response["name"] == "Manchester City FC":
+        colors[0] = "#1CC6E8"
+    print(response["name"])
+    return colors
+    
+    
+
 def format_date(match_date):
     return match_date[0:10]
 
@@ -209,15 +234,28 @@ def team_info(team):
     print("\t" + "WEBSITE: " + team["website"])
     print("\t" + "EMAIL: " + team["email"] + "\n")
 
-def newsletter(next_content, last_content, requested_team, status):
+def newsletter(next_content, last_content, requested_team, status, selected_team_id):
+    color_theme = club_colors(selected_team_id)
+    print(color_theme[0])
+    print(color_theme[1])
     x = 0
-    last_body = "THE LAST FIVE GAMES<br/><br/>"
-    next_body = "<br/>THE NEXT FIVE GAMES<br/><br/>"
+    last_body = "<b>THE LAST FIVE GAMES</b><br/><br/>"
+    next_body = "<b>THE NEXT FIVE GAMES</b><br/><br/>"
     while(x<10):
         last_body += f"{last_content[x]}<br/>{last_content[x+1]}<br/><br/>"
         next_body += f"{next_content[x]}<br/>{next_content[x+1]}<br/><br/>"
         x += 2
-    email_body = last_body + next_body
+    if color_theme[1] == "White" and requested_team != "TOTTENHAM HOTSPUR FC":
+        x = color_theme[0]
+        color_theme[0] = color_theme[1]
+        color_theme[1] = x
+    message = f"""<html>
+                <body style="font-family:'Verdana';text-align:center;color:{color_theme[0]};background-color:{color_theme[1]};">
+                    <h1 style="color:{color_theme[1]};background-color:{color_theme[0]};font-size:30px;">{requested_team} NEWSLETTER</h1>
+                    <p style="font-size:13px;">{last_body}</p>
+                    <p style="font-size:13px;">{next_body}</p>
+                </body>
+            </html>"""
     email_api_key = os.environ.get("API_KEY")
     api_secret = os.environ.get("API_SECRET")
     mailjet = Client(auth=(email_api_key, api_secret), version='v3.1')
@@ -234,9 +272,9 @@ def newsletter(next_content, last_content, requested_team, status):
             "Name": "Oliver"
             }
         ],
-        "Subject": f"{requested_team} NEWSLETTER",
+        "Subject": "Premier League Team",
         "TextPart": "",
-        "HTMLPart": f'<font style = "Sans Serif">{email_body}</font>',
+        "HTMLPart": message,
         "CustomID": "Team Newsletter"
         }
     ]
@@ -293,7 +331,7 @@ while menu_selection!="done":
     matches = []
     
     if menu_selection == "1":
-        purpose == "console"
+        purpose = "console"
         status = "SCHEDULED"
         connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=SCHEDULED', None, headers )
         response = json.loads(connection.getresponse().read().decode())
@@ -392,7 +430,7 @@ while menu_selection!="done":
                     matches.append(match)     
         next_content = next_five(matches, status, purpose)
         
-        newsletter(next_content, last_content, requested_team, status)
+        newsletter(next_content, last_content, requested_team, status, selected_team_id)
 
     menu_selection = get_menu_option()
 
