@@ -3,9 +3,6 @@ import json
 import http.client
 import requests
 from mailjet_rest import Client
-#import sendgrid
-#from sendgrid import SendGridAPIClient
-#from sendgrid.helpers.mail import Mail
 from dotenv import load_dotenv
 
 def format_date(match_date):
@@ -65,7 +62,7 @@ def next_five(matches):
     print()
 
 def last_five(matches, requested_team):
-    html_content = ""
+    html_content = []
     print()
     print("-----------------------------")
     print("THE LAST FIVE COMPLETED GAMES")
@@ -82,9 +79,9 @@ def last_five(matches, requested_team):
         print(matchday_info)
         print(matchday_score)
         print()
-        html_content += "\n" + matchday_info + "\n" + matchday_score
+        html_content.append(matchday_info)
+        html_content.append(matchday_score)
         x -= 1
-    print(html_content)
     return html_content
 
 def whole_season(matches, requested_team):
@@ -200,6 +197,11 @@ def team_info(team):
     print("\t" + "EMAIL: " + team["email"] + "\n")
 
 def newsletter(content):
+    x = 0
+    email_body = ""
+    while(x<10):
+        email_body += f"{content[x]}<br/>    {content[x+1]}<br/><br/>"
+        x += 2
     email_api_key = os.environ.get("API_KEY")
     api_secret = os.environ.get("API_SECRET")
     mailjet = Client(auth=(email_api_key, api_secret), version='v3.1')
@@ -218,7 +220,7 @@ def newsletter(content):
         ],
         "Subject": "Greetings from Mailjet.",
         "TextPart": "My first Mailjet email",
-        "HTMLPart": content,
+        "HTMLPart": email_body,
         "CustomID": "AppGettingStartedTest"
         }
     ]
@@ -226,20 +228,6 @@ def newsletter(content):
     result = mailjet.send.create(data=data)
     print(result.status_code)
     print(result.json())
-
-    #message = Mail(
-    #from_email=os.environ.get("MY_EMAIL_ADDRESS"),
-    #to_emails="omf11@georgetown.edu",
-    #subject='Sending with Twilio SendGrid is Fun',
-    #html_content='<strong>and easy to do anywhere, even with Python</strong>')
-    #try:
-    #    sendgrid_client = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
-    #    response = sendgrid_client.send(message)
-    #    print(response.status_code)
-    #    print(response.body)
-    #    print(response.headers)
-    #except Exception as e:
-    #    print(e)
 
 team_names = []
 short_names = []
