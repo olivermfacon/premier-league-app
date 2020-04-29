@@ -11,7 +11,7 @@ def format_date(match_date):
     return match_date[0:10]
 
 def get_menu_option():
-    print("1. View their next five fixtures...")
+    print("1. View their next 5 fixtures...")
     print("2. View their last 5 fixtures...")
     print("3. View their entire current season...")
     print("4. View their position in the table...")
@@ -64,6 +64,7 @@ def next_five(matches):
     print()
 
 def last_five(matches, requested_team):
+    html_content = ""
     print()
     print("-----------------------------")
     print("THE LAST FIVE COMPLETED GAMES")
@@ -75,10 +76,15 @@ def last_five(matches, requested_team):
         match_date = matches[finished_games - x]["utcDate"]
         match_date = format_date(match_date)
         match_information = match_info(matches[finished_games - x])
-        print("(" + match_date + ") Matchday " + str(matches[finished_games - x]["matchday"]) + " - " + match_information[2])
-        print("\t" + match_information[0] + " " + str(matches[finished_games - x]["score"]["fullTime"]["homeTeam"]) + " vs " + match_information[1] + " " + str(matches[finished_games - x]["score"]["fullTime"]["awayTeam"]))
+        matchday_info = "(" + match_date + ") Matchday " + str(matches[finished_games - x]["matchday"]) + " - " + match_information[2]
+        matchday_score = "\t" + match_information[0] + " " + str(matches[finished_games - x]["score"]["fullTime"]["homeTeam"]) + " vs " + match_information[1] + " " + str(matches[finished_games - x]["score"]["fullTime"]["awayTeam"])
+        print(matchday_info)
+        print(matchday_score)
         print()
+        html_content += "\n" + matchday_info + "\n" + matchday_score
         x -= 1
+    print(html_content)
+    return html_content
 
 def whole_season(matches, requested_team):
     x=0
@@ -193,12 +199,11 @@ def team_info(team):
     print("\t" + "EMAIL: " + team["email"] + "\n")
 
 def newsletter():
-    print(MY_EMAIL_ADDRESS)
     message = Mail(
     from_email = MY_EMAIL_ADDRESS,
     to_emails = MY_EMAIL_ADDRESS,
     subject = 'Hello World from the SendGrid Python Library!',
-    html_content = 'Hello, Email!'
+    html_content = 'hello'
     )
     sg = SendGridAPIClient(SENDGRID_API_KEY)
     response = sg.send(message)
@@ -307,6 +312,12 @@ while menu_selection!="done":
         team_info(team)
     
     elif menu_selection == "8":
+       #connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=FINISHED', None, headers )
+       #response = json.loads(connection.getresponse().read().decode())
+       #for match in response["matches"]:
+       #    if match["competition"]["name"] == "Premier League":
+       #        matches.append(match)
+       #content = last_five(matches, requested_team)
         newsletter()
 
     menu_selection = get_menu_option()
