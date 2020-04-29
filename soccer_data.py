@@ -42,32 +42,43 @@ def match_info(match):
         match_information.append("DRAW")
     return match_information
 
-def next_five(matches):
-    print()
-    print("------------------------------")
-    print("THE NEXT FIVE SCHEDULED GAMES:")
-    print("------------------------------")
-    print()
+def next_five(matches, status, purpose):
+    next_content = []
+    if purpose == "console":
+        print()
+        print("------------------------------")
+        print("THE NEXT FIVE SCHEDULED GAMES:")
+        print("------------------------------")
+        print()
     x=0
     while(x < 5):
         match_date = matches[x]["utcDate"]
         match_date = format_date(match_date)
-        print("(" + match_date + ") Matchday " + str(matches[x]["matchday"]))
-        print("\t" + matches[x]["homeTeam"]["name"] + " vs " + matches[x]["awayTeam"]["name"])
-        print()
-        if matches[x]["matchday"] == 38:
-            print("---> END OF SEASON <---")
-            break
+        match_info = ("(" + match_date + ") Matchday " + str(matches[x]["matchday"]))
+        match_teams = ("\t" + matches[x]["homeTeam"]["name"] + " vs " + matches[x]["awayTeam"]["name"])
+        if purpose == "console":
+            print(match_info)
+            print(match_teams)
+            if status == "POSTPONED" or status == "CANCELLED":
+                print(status)
+            print()
+            if matches[x]["matchday"] == 38:
+                print("---> END OF SEASON <---")
+                break
+        elif purpose == "email":
+            next_content.append(match_info)
+            next_content.append(match_teams)
         x += 1
-    print()
+    return next_content
 
-def last_five(matches, requested_team):
-    html_content = []
-    print()
-    print("-----------------------------")
-    print("THE LAST FIVE COMPLETED GAMES")
-    print("-----------------------------")
-    print()
+def last_five(matches, requested_team, purpose):
+    last_content = []
+    if purpose == "console":
+        print()
+        print("-----------------------------")
+        print("THE LAST FIVE COMPLETED GAMES")
+        print("-----------------------------")
+        print()
     x=5
     finished_games = len(matches)
     while(x > 0):
@@ -76,13 +87,15 @@ def last_five(matches, requested_team):
         match_information = match_info(matches[finished_games - x])
         matchday_info = "(" + match_date + ") Matchday " + str(matches[finished_games - x]["matchday"]) + " - " + match_information[2]
         matchday_score = "\t" + match_information[0] + " " + str(matches[finished_games - x]["score"]["fullTime"]["homeTeam"]) + " vs " + match_information[1] + " " + str(matches[finished_games - x]["score"]["fullTime"]["awayTeam"])
-        print(matchday_info)
-        print(matchday_score)
-        print()
-        html_content.append(matchday_info)
-        html_content.append(matchday_score)
+        if purpose == "console":
+            print(matchday_info)
+            print(matchday_score)
+            print()
+        elif purpose == "email":
+            last_content.append(matchday_info)
+            last_content.append(matchday_score)
         x -= 1
-    return html_content
+    return last_content
 
 def whole_season(matches, requested_team):
     x=0
@@ -196,12 +209,15 @@ def team_info(team):
     print("\t" + "WEBSITE: " + team["website"])
     print("\t" + "EMAIL: " + team["email"] + "\n")
 
-def newsletter(content):
+def newsletter(next_content, last_content, requested_team, status):
     x = 0
-    email_body = ""
+    last_body = "THE LAST FIVE GAMES<br/><br/>"
+    next_body = "<br/>THE NEXT FIVE GAMES<br/><br/>"
     while(x<10):
-        email_body += f"{content[x]}<br/>    {content[x+1]}<br/><br/>"
+        last_body += f"{last_content[x]}<br/>{last_content[x+1]}<br/><br/>"
+        next_body += f"{next_content[x]}<br/>{next_content[x+1]}<br/><br/>"
         x += 2
+    email_body = last_body + next_body
     email_api_key = os.environ.get("API_KEY")
     api_secret = os.environ.get("API_SECRET")
     mailjet = Client(auth=(email_api_key, api_secret), version='v3.1')
@@ -218,10 +234,10 @@ def newsletter(content):
             "Name": "Oliver"
             }
         ],
-        "Subject": "Greetings from Mailjet.",
-        "TextPart": "My first Mailjet email",
-        "HTMLPart": email_body,
-        "CustomID": "AppGettingStartedTest"
+        "Subject": f"{requested_team} NEWSLETTER",
+        "TextPart": "",
+        "HTMLPart": f'<font style = "Sans Serif">{email_body}</font>',
+        "CustomID": "Team Newsletter"
         }
     ]
     }
@@ -275,22 +291,39 @@ menu_selection = get_menu_option()
 
 while menu_selection!="done":
     matches = []
-
+    
     if menu_selection == "1":
+        purpose == "console"
+        status = "SCHEDULED"
         connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=SCHEDULED', None, headers )
         response = json.loads(connection.getresponse().read().decode())
         for match in response["matches"]:
             if match["competition"]["name"] == "Premier League":
                 matches.append(match)
-        next_five(matches)
+        if len(matches) == 0:
+            status = "POSTPONED"
+            connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=POSTPONED', None, headers )
+            response = json.loads(connection.getresponse().read().decode())
+            for match in response["matches"]:
+                if match["competition"]["name"] == "Premier League":
+                    matches.append(match)
+        if len(matches) == 0:
+            status = "CANCELLED"
+            connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=CANCELLED', None, headers )
+            response = json.loads(connection.getresponse().read().decode())
+            for match in response["matches"]:
+                if match["competition"]["name"] == "Premier League":
+                    matches.append(match)     
+        next_five(matches, status, purpose)
 
     elif menu_selection == "2":
+        purpose = "console"
         connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=FINISHED', None, headers )
         response = json.loads(connection.getresponse().read().decode())
         for match in response["matches"]:
             if match["competition"]["name"] == "Premier League":
                 matches.append(match)
-        last_five(matches, requested_team)
+        last_five(matches, requested_team, purpose)
 
     elif menu_selection == "3":
         connection.request('GET', f'/v2/teams/{selected_team_id}/matches', None, headers )
@@ -329,13 +362,37 @@ while menu_selection!="done":
         team_info(team)
     
     elif menu_selection == "8":
+        purpose = "email"
         connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=FINISHED', None, headers )
         response = json.loads(connection.getresponse().read().decode())
         for match in response["matches"]:
             if match["competition"]["name"] == "Premier League":
                matches.append(match)
-        content = last_five(matches, requested_team)
-        newsletter(content)
+        last_content = last_five(matches, requested_team, purpose)
+
+        status = "SCHEDULED"
+        connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=SCHEDULED', None, headers )
+        response = json.loads(connection.getresponse().read().decode())
+        for match in response["matches"]:
+            if match["competition"]["name"] == "Premier League":
+                matches.append(match)
+        if len(matches) == 0:
+            status = "POSTPONED"
+            connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=POSTPONED', None, headers )
+            response = json.loads(connection.getresponse().read().decode())
+            for match in response["matches"]:
+                if match["competition"]["name"] == "Premier League":
+                    matches.append(match)
+        if len(matches) == 0:
+            status = "CANCELLED"
+            connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=CANCELLED', None, headers )
+            response = json.loads(connection.getresponse().read().decode())
+            for match in response["matches"]:
+                if match["competition"]["name"] == "Premier League":
+                    matches.append(match)     
+        next_content = next_five(matches, status, purpose)
+        
+        newsletter(next_content, last_content, requested_team, status)
 
     menu_selection = get_menu_option()
 
