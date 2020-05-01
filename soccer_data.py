@@ -15,22 +15,31 @@ def get_menu_option():
     print("5. View the club roster...")
     print("6. View season statistics...")
     print("7. View team information...")
-    print()
+    print("8. Opponent's id")
+    print("9. Position")
+    print("10. Pour Form")
+    print("11. Opponent Form")
+    print("12. Opponents name")
+    print("13. Points")
+    print("14. Home")
+    print("15. Home Points")
+    print("16. Form")
+    print("17. Away Points")
     return input("CHOOSE AN OPTION BELOW BY ENTERING THE MENU NUMBER: ")
 
-def match_info(match):
+def match_info(match, team):
     match_information = []
     if match["score"]["winner"] == "HOME_TEAM":
         match_information.append(match["homeTeam"]["name"].upper())
         match_information.append(match["awayTeam"]["name"])
-        if match_information[0] == requested_team:
+        if match_information[0] == team:
             match_information.append("WIN")
         else:
             match_information.append("LOSS")
     elif match["score"]["winner"] == "AWAY_TEAM":
         match_information.append(match["homeTeam"]["name"])
         match_information.append(match["awayTeam"]["name"].upper())
-        if match_information[1] == requested_team:
+        if match_information[1] == team:
             match_information.append("WIN")
         else:
             match_information.append("LOSS")
@@ -39,6 +48,7 @@ def match_info(match):
         match_information.append(match["awayTeam"]["name"])
         match_information.append("DRAW")
     return match_information
+
 
 def next_five(matches):
     print()
@@ -70,7 +80,7 @@ def last_five(matches, requested_team):
     while(x > 0):
         match_date = matches[finished_games - x]["utcDate"]
         match_date = format_date(match_date)
-        match_information = match_info(matches[finished_games - x])
+        match_information = match_info(matches[finished_games - x], requested_team)
         print("(" + match_date + ") Matchday " + str(matches[finished_games - x]["matchday"]) + " - " + match_information[2])
         print("\t" + match_information[0] + " " + str(matches[finished_games - x]["score"]["fullTime"]["homeTeam"]) + " vs " + match_information[1] + " " + str(matches[finished_games - x]["score"]["fullTime"]["awayTeam"]))
         print()
@@ -88,7 +98,7 @@ def whole_season(matches, requested_team):
         match_date = match["utcDate"]
         match_date = format_date(match_date)
         if match["status"] == "FINISHED":
-            match_information = match_info(match)
+            match_information = match_info(match,requested_team)
             print("(" + match_date + ") Matchday " + str(match["matchday"]) + " - " + match_information[2])
             print("\t" + match_information[0] + " " + str(match["score"]["fullTime"]["homeTeam"]) + " vs " + match_information[1] + " " + str(match["score"]["fullTime"]["awayTeam"]))
         else:
@@ -189,6 +199,189 @@ def team_info(team):
     print("\t" + "EMAIL: " + team["email"] + "\n")
 
 
+def next_game(matches):
+    
+    #getting opponents id:
+
+    RequestDataPostponed(selected_team_id)
+
+    if matches[0]["homeTeam"]["id"] == selected_team_id:
+        opponent_id = matches[0]["awayTeam"]["id"]
+    else:
+        opponent_id = matches[0]["homeTeam"]["id"]
+
+
+    #print(opponent_id)
+    return(opponent_id)
+   
+
+def home(matches):
+
+    RequestDataPostponed(selected_team_id)
+
+    home = 0
+
+    if matches[0]["homeTeam"]["id"] == selected_team_id:
+        home = 5
+        
+    else:
+        home = -5
+    #print(home)
+    return(home)
+    
+
+
+def next_gamename(matches):
+
+    RequestDataPostponed(selected_team_id)
+    
+    if matches[0]["homeTeam"]["id"] == selected_team_id:
+        opponentname = matches[0]["awayTeam"]["name"].upper()
+    else:
+        opponentname = matches[0]["homeTeam"]["name"].upper()
+
+    
+    #print(opponentname)
+    return(opponentname)
+
+
+def opponent_form(opponent_matches, opponent_id):
+
+    RequestDataFinished(next_game(matches),opponent_matches)
+
+    y=5
+    finished_games = len(opponent_matches)
+    opp_form = 0
+    while(y > 0):
+        match_date = opponent_matches[finished_games - y]["utcDate"]
+        match_date = format_date(match_date)
+        match_information = match_info(opponent_matches[finished_games - y], opponent_id)
+        if match_information[2] == "WIN":
+            opp_form = opp_form + 9
+        elif match_information[2] == "LOSS":
+            opp_form = opp_form + 0
+        elif match_information[2] == "DRAW":
+            opp_form = opp_form + 3
+
+        y -= 1
+
+    
+    print(opp_form)
+    return(opp_form)
+
+    
+
+
+def position(team_stats):
+
+    position = team_stats["position"]*-1
+
+    print(position)
+
+
+def form(matches, requested_team):
+
+    RequestDataFinished(selected_team_id, matches)
+    x=5
+    finished_games = len(matches)
+    form = 0
+    while(x > 0):
+        match_date = matches[finished_games - x]["utcDate"]
+        match_date = format_date(match_date)
+        match_information = match_info(matches[finished_games - x], requested_team)
+        if match_information[2] == "WIN":
+            form = form + 9
+        elif match_information[2] == "LOSS":
+            form = form + 0
+        elif match_information[2] == "DRAW":
+            form = form + 3
+
+        x -= 1
+    
+    #print(form)
+    return(form)
+    
+    #print(requested_team)
+    
+
+def points(selected_team_id):
+
+    id = next_game(matches)
+
+    for team in standings:
+        if team["team"]["id"] == selected_team_id:
+            ourpoints = str(team["points"])
+        elif team["team"]["id"] == id:
+            opp_points = str(team["points"])
+
+
+    print(ourpoints)
+    print(opp_points)
+
+
+def points2(selected_team_id):
+
+    standings = RequestDataStandings()
+
+
+    for team in standings:
+        if team["team"]["id"] == selected_team_id:
+            points = str(team["points"])
+    
+    #print(points)
+    return(points)
+
+
+def HomePoints():
+
+    points = float((form(matches, requested_team)) + float(home(matches)) + float(points2(selected_team_id)))
+
+    print(points)
+    return(points)
+
+def AwayPoints():
+
+    points = float(points2(next_game(matches)))  + float(opponent_form(opponent_matches,next_gamename(matches)))
+
+    print(points)
+    return(points)
+
+
+def Odds():
+    
+    odds = HomePoints()/(AwayPoints()+HomePoints())
+
+    print(odds)
+
+
+
+
+def RequestDataFinished(selected_team_id, listt):
+    connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=FINISHED', None, headers )
+    response = json.loads(connection.getresponse().read().decode())
+    for match in response["matches"]:
+        if match["competition"]["name"] == "Premier League":
+            listt.append(match)
+    return(listt)
+
+def RequestDataPostponed(selected_team_id):
+    connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=POSTPONED', None, headers )
+    response = json.loads(connection.getresponse().read().decode())
+    for match in response["matches"]:
+        if match["competition"]["name"] == "Premier League":
+            matches.append(match)
+    return(matches)
+
+def RequestDataStandings():
+    connection.request('GET', '/v2/competitions/PL/standings', None, headers )
+    response = json.loads(connection.getresponse().read().decode())
+    standings = response["standings"][0]["table"]
+    return(standings)
+    
+
+
+
+
 team_names = []
 short_names = []
 tla = []
@@ -231,13 +424,16 @@ while valid_team == False:
 
 print()
 
+
+
 menu_selection = get_menu_option()
 
 while menu_selection!="done":
     matches = []
+    opponent_matches = []
 
     if menu_selection == "1":
-        connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=SCHEDULED', None, headers )
+        connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=POSTPONED', None, headers )
         response = json.loads(connection.getresponse().read().decode())
         for match in response["matches"]:
             if match["competition"]["name"] == "Premier League":
@@ -288,11 +484,122 @@ while menu_selection!="done":
         team = response
         team_info(team)
 
+    elif menu_selection == "8":
+        #connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=POSTPONED', None, headers )
+        #response = json.loads(connection.getresponse().read().decode())
+        #for match in response["matches"]:
+            #if match["competition"]["name"] == "Premier League":
+                #matches.append(match)
+        next_game(matches)
+
+
+    elif menu_selection == "9":
+        connection.request('GET', '/v2/competitions/PL/standings', None, headers )
+        response = json.loads(connection.getresponse().read().decode())
+        table = response["standings"][0]["table"]
+        x = 0
+        for team in table:
+            if team["team"]["name"].upper() == requested_team:
+                position(table[x])
+            x += 1
+    
+
+
+    elif menu_selection == "10":
+        #connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=FINISHED', None, headers )
+        #response = json.loads(connection.getresponse().read().decode())
+        #for match in response["matches"]:
+            #if match["competition"]["name"] == "Premier League":
+                #matches.append(match)
+        
+        
+        form(matches, requested_team)
+      
+        
+
+    elif menu_selection == "11":
+        
+        
+        #connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=POSTPONED', None, headers )
+        #response = json.loads(connection.getresponse().read().decode())
+        #for match in response["matches"]:
+            #if match["competition"]["name"] == "Premier League":
+                #matches.append(match)
+        
+
+        #connection.request('GET', f'/v2/teams/{next_game(matches)}/matches?status=FINISHED', None, headers )
+        #response = json.loads(connection.getresponse().read().decode())
+        #for match in response["matches"]:
+            #if match["competition"]["name"] == "Premier League":
+                #opponent_matches.append(match)
+
+
+        opponent_form(opponent_matches, next_gamename(matches))
+        
+        
+   
+
+    elif menu_selection == "12":
+        #connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=POSTPONED', None, headers )
+        #response = json.loads(connection.getresponse().read().decode())
+        #for match in response["matches"]:
+            #if match["competition"]["name"] == "Premier League":
+                #matches.append(match)
+        next_gamename(matches)
+    
+
+
+    elif menu_selection == "13":
+
+        #connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=POSTPONED', None, headers )
+        #response = json.loads(connection.getresponse().read().decode())
+        #for match in response["matches"]:
+            #if match["competition"]["name"] == "Premier League":
+                #matches.append(match)
+        
+
+        #connection.request('GET', '/v2/competitions/PL/standings', None, headers )
+        #response = json.loads(connection.getresponse().read().decode())
+        #standings = response["standings"][0]["table"]
+        points2(selected_team_id)
+
+
+
+    elif menu_selection == "14":
+        #connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=POSTPONED', None, headers )
+        #response = json.loads(connection.getresponse().read().decode())
+        #for match in response["matches"]:
+            #if match["competition"]["name"] == "Premier League":
+                #matches.append(match)
+
+        #RequestDataPostponed(selected_team_id)
+        home(matches)
+
+    elif menu_selection =="15":
+
+        
+
+        #connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=FINISHED', None, headers )
+        #response = json.loads(connection.getresponse().read().decode())
+        #for match in response["matches"]:
+            #if match["competition"]["name"] == "Premier League":
+                #matches.append(match)
+        
+        HomePoints()
+
+    elif menu_selection == "16":
+
+        RequestDataFinished(selected_team_id, matches)
+        form(matches, requested_team)
+
+    elif menu_selection == "17":
+
+        AwayPoints()
+
+    elif menu_selection == "18":
+
+        Odds()
+
     menu_selection = get_menu_option()
 
     
-
-#pip install -U python-dotenv
-
-
-#bflkjwbfkjb
