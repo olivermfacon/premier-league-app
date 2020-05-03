@@ -362,6 +362,33 @@ def season_statistics(team_stats):
     print("\tGoal Difference: " + str(team_stats["goalDifference"]) + "\n")
 
 def team_info(team, purpose):
+
+    """
+    Function that displays and returns the information about the tean.
+
+    Params: 
+        team(dict) contains all information about requested team
+        purpose(string) like "console"
+
+    Example of team stats displayed:
+        ARSENAL FC
+
+            FOUNDED: 1886
+            VENUE: Emirates Stadium
+            CLUB COLORS: Red / White
+
+            ACTIVE COMPETITIONS:
+            Premier League
+            UEFA Europa League
+            FA Cup
+
+            ADDRESS: 75 Drayton Park London N5 1BU
+            PHONE: +44 (020) 76195003
+            WEBSITE: http://www.arsenal.com
+            EMAIL: info@arsenal.co.uk
+    """
+
+
     if purpose == "console":
         print("\n" + team["name"].upper() + "\n")
         print("\t" + "FOUNDED: " + str(team["founded"]))
@@ -439,6 +466,14 @@ def newsletter(next_content, last_content, requested_team, selected_team_id, tea
     print(result.json())
 
 def form(selected_id):
+    """
+    Function that calculates the form of the team based on last 5 games.
+
+    Params: 
+        selected_id(string) holds value of a id of the requested team
+
+    """
+
     connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=FINISHED', None, headers )
     response = json.loads(connection.getresponse().read().decode())
 
@@ -450,10 +485,12 @@ def form(selected_id):
     x=1
     form = 0
     while(x<6):
+        #if team won the game, it gets 9 points
         if finished_matches[num_games-x]["score"]["winner"] == "HOME_TEAM" and finished_matches[num_games-x]["homeTeam"]["id"] == selected_id:
             form += 9
         elif finished_matches[num_games-x]["score"]["winner"] == "AWAY_TEAM" and finished_matches[num_games-x]["awayTeam"]["id"] == selected_id:
             form += 9
+        #if team drew the game, it gets 3 points
         elif finished_matches[num_games-x]["score"]["winner"] == "None":
             form += 3
         x+=1
