@@ -260,12 +260,34 @@ def prem_table(standings, selected_team_id):
     print()
 
 def display_squad(squad):
+    """
+    Function that displays the squad of the requested team.
+
+    Params: 
+        squad(list) contains all information about the squad of the requested team.
+        
+    Example of part of the squad displayed:
+        Roster:
+
+    COACH: Pep Guardiola
+
+    GOALKEEPERS
+
+        Ederson
+        Scott Carson
+        Claudio Bravo
+
+    DEFENDERS
+
+        João Cancelo
+        Nicolás Otamendi
+        Kyle Walker
+    """
     print()
     goalkeepers = []
     defenders = []
     midfielders = []
     attackers = []
-    #print(squad)
     for person in squad:
         if person["position"] == "Goalkeeper":
             goalkeepers.append(person["name"])
