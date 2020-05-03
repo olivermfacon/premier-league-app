@@ -314,6 +314,32 @@ def display_squad(squad):
     print()
 
 def season_statistics(team_stats):
+    """
+    Function that displays statistics for the season.
+
+    Params: 
+        team_stats(list) contains all information about requested team
+
+    Example of 1 game displayed:
+        Season Stats:
+
+        Manchester City FC Season Statistics
+
+            League Standing: 2nd
+            Points: 57
+
+            Games Played: 28
+            Wins: 18
+            Draws: 3
+            Losses: 7
+            Win Percentage: 64.28%
+
+            Goals Scored: 68
+            Goals Conceded: 31
+            Goal Difference: 37
+    """
+
+
     win_percentage = (team_stats["won"]/team_stats["playedGames"])*100
     if team_stats["position"] == 1:
         place = "st"
