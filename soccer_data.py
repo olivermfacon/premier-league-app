@@ -6,6 +6,12 @@ from mailjet_rest import Client
 from dotenv import load_dotenv
 
 def club_colors(selected_team_id):
+    """
+    Returns the colors based on the id of the team. The color is later used in the newsletter so that fans receive the email in the colors of their favorite team.
+
+    Param: selected_team_id
+
+    """
     basic_colors = ["Red", "Blue", "Green", "Yellow"]
     colors = []
     connection.request('GET', f'/v2/teams/{selected_team_id}', None, headers )
@@ -32,9 +38,24 @@ def club_colors(selected_team_id):
     return colors
     
 def format_date(match_date):
+    """
+    Formats a data string for printing and display purposes.
+
+    Param: my_price (str) like "2019-08-11T13:00:00Z"
+
+    Example: format_date(2019-08-11T13:00:00Z)
+
+    Returns: 2019-08-11
+    """
+
     return match_date[0:10]
 
 def get_menu_option():
+    """
+    Function to display menu options and asking the user to choose one.
+
+    """
+
     print("1. View their next 5 fixtures...")
     print("2. View their last 5 fixtures...")
     print("3. View their entire current season...")
@@ -48,6 +69,17 @@ def get_menu_option():
     return input("CHOOSE AN OPTION BELOW BY ENTERING THE MENU NUMBER: ")
 
 def match_info(match):
+    """
+    Functions that returns match information for printing and display purposes.
+
+    Param: match (int or float) like 4000.444444
+
+    Example: to_usd(4000.444444)
+
+    Returns: $4,000.44
+    """
+
+
     match_information = []
     if match["score"]["winner"] == "HOME_TEAM":
         match_information.append(match["homeTeam"]["name"].upper())
