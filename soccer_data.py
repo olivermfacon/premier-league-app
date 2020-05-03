@@ -70,9 +70,9 @@ def get_menu_option():
 
 def match_info(match):
     """
-    Functions that returns match information for printing and display purposes.
+    Functions that returns the list called match_information. In conjunction with other function, it is used to display information about the games.
 
-    Param: match (int or float) like 4000.444444
+    Param: match is string that holds value of a dictionary key
 
     Example: to_usd(4000.444444)
 
