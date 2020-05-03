@@ -106,7 +106,9 @@ def next_five(matches, status, purpose):
         status(string) holds value of a dictionary key like "FINISHED"
         purpose(string) like "email"
 
-    Example of 1 game: ""
+    Example of 1 game displayed:
+        (2020-03-22) Matchday 31
+	    Southampton FC vs Arsenal FC
     """
     next_content = []
     if purpose == "console":
@@ -137,6 +139,18 @@ def next_five(matches, status, purpose):
     return next_content
 
 def last_five(matches, requested_team, purpose):
+    """
+    Function that displays results for last 5 games.
+
+    Params: 
+        matches(list) contains all information about requested team
+        requested_team(string) holds value of a id of the requested team
+        purpose(string) like "console"
+
+    Example of 1 game displayed:
+        (2020-02-23) Matchday 27 - WIN
+	    ARSENAL FC 3 vs Everton FC 2
+    """
     last_content = []
     if purpose == "console":
         print()
@@ -163,6 +177,18 @@ def last_five(matches, requested_team, purpose):
     return last_content
 
 def whole_season(matches, requested_team):
+    """
+    Function that displays fixtures for the entire season. Both the finished and scheduled/postponed games.
+
+    Params: 
+        matches(list) contains all information about requested team
+        requested_team(string) holds value of a id of the requested team
+
+    Example of 2 games displayed:
+        (2020-02-23) Matchday 27 - WIN
+	    ARSENAL FC 3 vs Everton FC 2
+    """
+    
     x=0
     if matches[x]["status"] == "FINISHED":
         print()
