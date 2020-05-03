@@ -185,8 +185,16 @@ def whole_season(matches, requested_team):
         requested_team(string) holds value of a id of the requested team
 
     Example of 2 games displayed:
-        (2020-02-23) Matchday 27 - WIN
-	    ARSENAL FC 3 vs Everton FC 2
+        (2020-03-07) Matchday 29 - WIN
+	LIVERPOOL FC 2 vs AFC Bournemouth 1
+    
+        -----------------
+        UPCOMING FIXTURES
+        -----------------
+    
+        (2020-03-16) Matchday 30
+        Everton FC vs Liverpool FC
+        ---> THIS FIXTURE IS POSTPONED <---
     """
     
     x=0
@@ -221,6 +229,24 @@ def whole_season(matches, requested_team):
     print()
 
 def prem_table(standings, selected_team_id):
+    """
+    Function that displays requested team position in the league.
+
+    Params: 
+        standings(list) contains all information about season table.
+        selected_team_id(string) holds value of a id of the requested team
+
+    Example of table displayed when the user chooses Manchester City:
+        -----------------------------
+        LIVE PREMIER LEAGUE STANDINGS
+        -----------------------------
+
+        1.	Liverpool FC (82pts)
+        2.	---> MANCHESTER CITY FC <--- (57pts)
+        3.	Leicester City FC (53pts)s
+    """
+
+
     print()
     print("-----------------------------")
     print("LIVE PREMIER LEAGUE STANDINGS")
