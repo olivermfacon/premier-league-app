@@ -74,11 +74,7 @@ def match_info(match):
 
     Param: match is string that holds value of a dictionary key
 
-    Example: to_usd(4000.444444)
-
-    Returns: $4,000.44
     """
-
 
     match_information = []
     if match["score"]["winner"] == "HOME_TEAM":
@@ -102,6 +98,16 @@ def match_info(match):
     return match_information
 
 def next_five(matches, status, purpose):
+    """
+    Function that displays the schedule for next 5 games. If there are fewer than 5 games left in the season, the function will dipsplay however many there are left.
+
+    Params: 
+        matches(list) contains all information about requested team
+        status(string) holds value of a dictionary key like "FINISHED"
+        purpose(string) like "email"
+
+    Example of 1 game: ""
+    """
     next_content = []
     if purpose == "console":
         print()
