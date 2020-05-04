@@ -1,1 +1,8 @@
 sendgrid
+mailjet_rest
+requests
+http.client
+dotenv
+json #not sure about this one
+os  #not sure about this one
+
