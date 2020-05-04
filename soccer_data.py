@@ -6,6 +6,12 @@ from mailjet_rest import Client
 from dotenv import load_dotenv
 
 def club_colors(selected_team_id):
+    """
+    Returns the colors based on the id of the team. The color is later used in the newsletter so that fans receive the email in the colors of their favorite team.
+
+    Param: selected_team_id
+
+    """
     basic_colors = ["Red", "Blue", "Green", "Yellow"]
     colors = []
     connection.request('GET', f'/v2/teams/{selected_team_id}', None, headers )
@@ -32,9 +38,24 @@ def club_colors(selected_team_id):
     return colors
     
 def format_date(match_date):
+    """
+    Formats a data string for printing and display purposes.
+
+    Param: my_price (str) like "2019-08-11T13:00:00Z"
+
+    Example: format_date(2019-08-11T13:00:00Z)
+
+    Returns: 2019-08-11
+    """
+
     return match_date[0:10]
 
 def get_menu_option():
+    """
+    Function to display menu options and asking the user to choose one.
+
+    """
+
     print("1. View their next 5 fixtures...")
     print("2. View their last 5 fixtures...")
     print("3. View their entire current season...")
@@ -48,6 +69,13 @@ def get_menu_option():
     return input("CHOOSE AN OPTION BELOW BY ENTERING THE MENU NUMBER: ")
 
 def match_info(match):
+    """
+    Functions that returns the list called match_information. In conjunction with other function, it is used to display information about the games.
+
+    Param: match is string that holds value of a dictionary key
+
+    """
+
     match_information = []
     if match["score"]["winner"] == "HOME_TEAM":
         match_information.append(match["homeTeam"]["name"].upper())
@@ -70,6 +98,18 @@ def match_info(match):
     return match_information
 
 def next_five(matches, status, purpose):
+    """
+    Function that displays the schedule for next 5 games. If there are fewer than 5 games left in the season, the function will dipsplay however many there are left.
+
+    Params: 
+        matches(list) contains all information about requested team
+        status(string) holds value of a dictionary key like "FINISHED"
+        purpose(string) like "email"
+
+    Example of 1 game displayed:
+        (2020-03-22) Matchday 31
+	    Southampton FC vs Arsenal FC
+    """
     next_content = []
     if purpose == "console":
         print()
@@ -99,6 +139,18 @@ def next_five(matches, status, purpose):
     return next_content
 
 def last_five(matches, requested_team, purpose):
+    """
+    Function that displays results for last 5 games.
+
+    Params: 
+        matches(list) contains all information about requested team
+        requested_team(string) holds value of a id of the requested team
+        purpose(string) like "console"
+
+    Example of 1 game displayed:
+        (2020-02-23) Matchday 27 - WIN
+	    ARSENAL FC 3 vs Everton FC 2
+    """
     last_content = []
     if purpose == "console":
         print()
@@ -125,6 +177,26 @@ def last_five(matches, requested_team, purpose):
     return last_content
 
 def whole_season(matches, requested_team):
+    """
+    Function that displays fixtures for the entire season. Both the finished and scheduled/postponed games.
+
+    Params: 
+        matches(list) contains all information about requested team
+        requested_team(string) holds value of a id of the requested team
+
+    Example of 2 games displayed:
+        (2020-03-07) Matchday 29 - WIN
+	LIVERPOOL FC 2 vs AFC Bournemouth 1
+    
+        -----------------
+        UPCOMING FIXTURES
+        -----------------
+    
+        (2020-03-16) Matchday 30
+        Everton FC vs Liverpool FC
+        ---> THIS FIXTURE IS POSTPONED <---
+    """
+    
     x=0
     if matches[x]["status"] == "FINISHED":
         print()
@@ -157,6 +229,24 @@ def whole_season(matches, requested_team):
     print()
 
 def prem_table(standings, selected_team_id):
+    """
+    Function that displays requested team position in the league.
+
+    Params: 
+        standings(list) contains all information about season table.
+        selected_team_id(string) holds value of a id of the requested team
+
+    Example of table displayed when the user chooses Manchester City:
+        -----------------------------
+        LIVE PREMIER LEAGUE STANDINGS
+        -----------------------------
+
+        1.	Liverpool FC (82pts)
+        2.	---> MANCHESTER CITY FC <--- (57pts)
+        3.	Leicester City FC (53pts)s
+    """
+
+
     print()
     print("-----------------------------")
     print("LIVE PREMIER LEAGUE STANDINGS")
@@ -170,12 +260,34 @@ def prem_table(standings, selected_team_id):
     print()
 
 def display_squad(squad):
+    """
+    Function that displays the squad of the requested team.
+
+    Params: 
+        squad(list) contains all information about the squad of the requested team.
+        
+    Example of part of the squad displayed:
+        Roster:
+
+    COACH: Pep Guardiola
+
+    GOALKEEPERS
+
+        Ederson
+        Scott Carson
+        Claudio Bravo
+
+    DEFENDERS
+
+        João Cancelo
+        Nicolás Otamendi
+        Kyle Walker
+    """
     print()
     goalkeepers = []
     defenders = []
     midfielders = []
     attackers = []
-    #print(squad)
     for person in squad:
         if person["position"] == "Goalkeeper":
             goalkeepers.append(person["name"])
@@ -202,6 +314,32 @@ def display_squad(squad):
     print()
 
 def season_statistics(team_stats):
+    """
+    Function that displays statistics for the season.
+
+    Params: 
+        team_stats(list) contains all information about requested team
+
+    Example of 1 game displayed:
+        Season Stats:
+
+        Manchester City FC Season Statistics
+
+            League Standing: 2nd
+            Points: 57
+
+            Games Played: 28
+            Wins: 18
+            Draws: 3
+            Losses: 7
+            Win Percentage: 64.28%
+
+            Goals Scored: 68
+            Goals Conceded: 31
+            Goal Difference: 37
+    """
+
+
     win_percentage = (team_stats["won"]/team_stats["playedGames"])*100
     if team_stats["position"] == 1:
         place = "st"
@@ -224,6 +362,33 @@ def season_statistics(team_stats):
     print("\tGoal Difference: " + str(team_stats["goalDifference"]) + "\n")
 
 def team_info(team, purpose):
+
+    """
+    Function that displays and returns the information about the tean.
+
+    Params: 
+        team(dict) contains all information about requested team
+        purpose(string) like "console"
+
+    Example of team stats displayed:
+        ARSENAL FC
+
+            FOUNDED: 1886
+            VENUE: Emirates Stadium
+            CLUB COLORS: Red / White
+
+            ACTIVE COMPETITIONS:
+            Premier League
+            UEFA Europa League
+            FA Cup
+
+            ADDRESS: 75 Drayton Park London N5 1BU
+            PHONE: +44 (020) 76195003
+            WEBSITE: http://www.arsenal.com
+            EMAIL: info@arsenal.co.uk
+    """
+
+
     if purpose == "console":
         print("\n" + team["name"].upper() + "\n")
         print("\t" + "FOUNDED: " + str(team["founded"]))
@@ -301,6 +466,14 @@ def newsletter(next_content, last_content, requested_team, selected_team_id, tea
     print(result.json())
 
 def form(selected_id):
+    """
+    Function that calculates the form of the team based on last 5 games.
+
+    Params: 
+        selected_id(string) holds value of a id of the requested team
+
+    """
+
     connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=FINISHED', None, headers )
     response = json.loads(connection.getresponse().read().decode())
 
@@ -312,10 +485,12 @@ def form(selected_id):
     x=1
     form = 0
     while(x<6):
+        #if team won the game, it gets 9 points
         if finished_matches[num_games-x]["score"]["winner"] == "HOME_TEAM" and finished_matches[num_games-x]["homeTeam"]["id"] == selected_id:
             form += 9
         elif finished_matches[num_games-x]["score"]["winner"] == "AWAY_TEAM" and finished_matches[num_games-x]["awayTeam"]["id"] == selected_id:
             form += 9
+        #if team drew the game, it gets 3 points
         elif finished_matches[num_games-x]["score"]["winner"] == "None":
             form += 3
         x+=1
