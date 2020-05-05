@@ -496,6 +496,10 @@ def form(selected_id):
         x+=1
     return form
 
+
+
+#if __name__ == "__main__":
+
 team_names = []
 short_names = []
 tla = []
@@ -508,222 +512,223 @@ headers = { 'X-Auth-Token': api_key }
 connection.request('GET', '/v2/competitions/PL/teams', None, headers )
 response = json.loads(connection.getresponse().read().decode())
 
-print("---------------------------------------------")
-print("SOCCER TEAM PROGRESS TRACKER (Premier League)")
-print("---------------------------------------------")
+if __name__ == "__main__":
+    print("---------------------------------------------")
+    print("SOCCER TEAM PROGRESS TRACKER (Premier League)")
+    print("---------------------------------------------")
 
-y = 1
+    y = 1
 
-for team in response["teams"]:
-    y += 1
-    team_names.append(team["name"])
-    short_names.append(team["shortName"])
-    tla.append(team["tla"])
-
-valid_team = False
-
-x=0
-
-while valid_team == False:
-    requested_team = input("ENTER THE NAME OF A PREMIER LEAGUE TEAM: ").lower()
     for team in response["teams"]:
-        if requested_team == team_names[x].lower() or requested_team == short_names[x].lower() or requested_team == tla[x].lower():
-            requested_team = team_names[x].upper()
-            selected_team_id = team["id"]
-            valid_team = True
-        x += 1
-    if valid_team == False:
-        print("Invalid team entry")
-        x = 0
+        y += 1
+        team_names.append(team["name"])
+        short_names.append(team["shortName"])
+        tla.append(team["tla"])
 
-print()
+    valid_team = False
 
-menu_selection = get_menu_option()
+    x=0
 
-while menu_selection!="done":
-    matches = []
-    
-    if menu_selection == "1":
-        purpose = "console"
-        status = "SCHEDULED"
-        connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=SCHEDULED', None, headers )
-        response = json.loads(connection.getresponse().read().decode())
-        for match in response["matches"]:
-            if match["competition"]["name"] == "Premier League":
-                matches.append(match)
-        if len(matches) == 0:
-            status = "POSTPONED"
-            connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=POSTPONED', None, headers )
-            response = json.loads(connection.getresponse().read().decode())
-            for match in response["matches"]:
-                if match["competition"]["name"] == "Premier League":
-                    matches.append(match)
-        if len(matches) == 0:
-            status = "CANCELLED"
-            connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=CANCELLED', None, headers )
-            response = json.loads(connection.getresponse().read().decode())
-            for match in response["matches"]:
-                if match["competition"]["name"] == "Premier League":
-                    matches.append(match)     
-        next_five(matches, status, purpose)
-
-    elif menu_selection == "2":
-        purpose = "console"
-        connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=FINISHED', None, headers )
-        response = json.loads(connection.getresponse().read().decode())
-        for match in response["matches"]:
-            if match["competition"]["name"] == "Premier League":
-                matches.append(match)
-        last_five(matches, requested_team, purpose)
-
-    elif menu_selection == "3":
-        connection.request('GET', f'/v2/teams/{selected_team_id}/matches', None, headers )
-        response = json.loads(connection.getresponse().read().decode())
-        for match in response["matches"]:
-            if match["competition"]["name"] == "Premier League":
-                matches.append(match)
-        whole_season(matches, requested_team)
-    
-    elif menu_selection == "4":
-        connection.request('GET', '/v2/competitions/PL/standings', None, headers )
-        response = json.loads(connection.getresponse().read().decode())
-        standings = response["standings"][0]["table"]
-        prem_table(standings,selected_team_id)
-
-    elif menu_selection == "5":
-        connection.request('GET', f'/v2/teams/{selected_team_id}', None, headers )
-        response = json.loads(connection.getresponse().read().decode())
-        squad = response["squad"]
-        display_squad(squad)
-
-    elif menu_selection == "6":
-        connection.request('GET', '/v2/competitions/PL/standings', None, headers )
-        response = json.loads(connection.getresponse().read().decode())
-        table = response["standings"][0]["table"]
-        x = 0
-        for team in table:
-            if team["team"]["name"].upper() == requested_team:
-                season_statistics(table[x])
+    while valid_team == False:
+        requested_team = input("ENTER THE NAME OF A PREMIER LEAGUE TEAM: ").lower()
+        for team in response["teams"]:
+            if requested_team == team_names[x].lower() or requested_team == short_names[x].lower() or requested_team == tla[x].lower():
+                requested_team = team_names[x].upper()
+                selected_team_id = team["id"]
+                valid_team = True
             x += 1
-        
-    elif menu_selection == "7":
-        purpose = "console"
-        connection.request('GET', f'/v2/teams/{selected_team_id}', None, headers )
-        response = json.loads(connection.getresponse().read().decode())
-        team = response
-        team_info(team, purpose)
-    
-    elif menu_selection == "8":
-        matches = []
-        purpose = "email"
-        connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=FINISHED', None, headers )
-        response = json.loads(connection.getresponse().read().decode())
-        for match in response["matches"]:
-            if match["competition"]["name"] == "Premier League":
-               matches.append(match)
-        last_content = last_five(matches, requested_team, purpose)
+        if valid_team == False:
+            print("Invalid team entry")
+            x = 0
 
-        status = "SCHEDULED"
-        connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=SCHEDULED', None, headers )
-        response = json.loads(connection.getresponse().read().decode())
-        for match in response["matches"]:
-            if match["competition"]["name"] == "Premier League":
-                matches.append(match)
-        if len(matches) == 0:
-            status = "POSTPONED"
-            connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=POSTPONED', None, headers )
-            response = json.loads(connection.getresponse().read().decode())
-            for match in response["matches"]:
-                if match["competition"]["name"] == "Premier League":
-                    matches.append(match)
-        if len(matches) == 0:
-            status = "CANCELLED"
-            connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=CANCELLED', None, headers )
-            response = json.loads(connection.getresponse().read().decode())
-            for match in response["matches"]:
-                if match["competition"]["name"] == "Premier League":
-                    matches.append(match)     
-        next_content = next_five(matches, status, purpose)
-
-        connection.request('GET', f'/v2/teams/{selected_team_id}', None, headers )
-        response = json.loads(connection.getresponse().read().decode())
-        team = response
-        team_contact = team_info(team, purpose)
-        
-        newsletter(next_content, last_content, requested_team, selected_team_id, team_contact)
-
-    elif menu_selection == "9":
-        finished_matches = []
-
-        connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=POSTPONED', None, headers )
-        response = json.loads(connection.getresponse().read().decode())
-
-        for match in response["matches"]:
-            if match["competition"]["name"] == "Premier League":
-                matches.append(match)
-        next_game = matches[0]
-        ids_names = [str(next_game["homeTeam"]["id"]), next_game["homeTeam"]["name"], str(next_game["awayTeam"]["id"]), next_game["awayTeam"]["name"]]
-        if selected_team_id == ids_names[0]:
-            home_bonus = 5
-        else:
-            home_bonus = -5
-        
-        y = 0 
-        z = 0
-
-        selected_team_id = str(selected_team_id)
-
-        for x in ids_names:
-            if x == selected_team_id:
-                team_id = selected_team_id
-                z = y
-            y+=1
-
-        if z == 0:
-            opp_id = ids_names[2]
-        else:
-            opp_id = ids_names[0]
-        
-        team_form = form(team_id)
-        opp_form = form(opp_id)
-        
-        connection.request('GET', '/v2/competitions/PL/standings', None, headers )
-        response = json.loads(connection.getresponse().read().decode())
-        standings = response["standings"][0]["table"]
-
-        for team in standings:
-            print(team_id)
-            print(team["team"]["id"])
-            if str(team["team"]["id"]) == team_id:
-                print("hi")
-                team_points = team["points"]
-            elif str(team["team"]["id"]) == opp_id:
-                opp_points = team["points"]
-
-        team_odds_tally = home_bonus + team_form + team_points
-        opp_odds_tally = opp_form + opp_points
-
-        win_prob = team_odds_tally / (opp_odds_tally + team_odds_tally)
-        
-        if odds < 0.5:
-            american_odds = (100/win_prob) - 100
-            american_odds = round(american_odds, 0)
-            american_odds = "+" + str(american_odds)
-        else:
-            american_odds = (win_prob*100 / (1 - win_prob))*-1
-            american_odds = round(american_odds, 0)
-            american_odds = str(american_odds)
-        
-        american_odds = american_odds[:4]
-        
-        print(american_odds)
-        
-        
-        
-
+    print()
 
     menu_selection = get_menu_option()
 
-    
+    while menu_selection!="done":
+        matches = []
+        
+        if menu_selection == "1":
+            purpose = "console"
+            status = "SCHEDULED"
+            connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=SCHEDULED', None, headers )
+            response = json.loads(connection.getresponse().read().decode())
+            for match in response["matches"]:
+                if match["competition"]["name"] == "Premier League":
+                    matches.append(match)
+            if len(matches) == 0:
+                status = "POSTPONED"
+                connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=POSTPONED', None, headers )
+                response = json.loads(connection.getresponse().read().decode())
+                for match in response["matches"]:
+                    if match["competition"]["name"] == "Premier League":
+                        matches.append(match)
+            if len(matches) == 0:
+                status = "CANCELLED"
+                connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=CANCELLED', None, headers )
+                response = json.loads(connection.getresponse().read().decode())
+                for match in response["matches"]:
+                    if match["competition"]["name"] == "Premier League":
+                        matches.append(match)     
+            next_five(matches, status, purpose)
 
-#pip install -U python-dotenv
+        elif menu_selection == "2":
+            purpose = "console"
+            connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=FINISHED', None, headers )
+            response = json.loads(connection.getresponse().read().decode())
+            for match in response["matches"]:
+                if match["competition"]["name"] == "Premier League":
+                    matches.append(match)
+            last_five(matches, requested_team, purpose)
+
+        elif menu_selection == "3":
+            connection.request('GET', f'/v2/teams/{selected_team_id}/matches', None, headers )
+            response = json.loads(connection.getresponse().read().decode())
+            for match in response["matches"]:
+                if match["competition"]["name"] == "Premier League":
+                    matches.append(match)
+            whole_season(matches, requested_team)
+        
+        elif menu_selection == "4":
+            connection.request('GET', '/v2/competitions/PL/standings', None, headers )
+            response = json.loads(connection.getresponse().read().decode())
+            standings = response["standings"][0]["table"]
+            prem_table(standings,selected_team_id)
+
+        elif menu_selection == "5":
+            connection.request('GET', f'/v2/teams/{selected_team_id}', None, headers )
+            response = json.loads(connection.getresponse().read().decode())
+            squad = response["squad"]
+            display_squad(squad)
+
+        elif menu_selection == "6":
+            connection.request('GET', '/v2/competitions/PL/standings', None, headers )
+            response = json.loads(connection.getresponse().read().decode())
+            table = response["standings"][0]["table"]
+            x = 0
+            for team in table:
+                if team["team"]["name"].upper() == requested_team:
+                    season_statistics(table[x])
+                x += 1
+            
+        elif menu_selection == "7":
+            purpose = "console"
+            connection.request('GET', f'/v2/teams/{selected_team_id}', None, headers )
+            response = json.loads(connection.getresponse().read().decode())
+            team = response
+            team_info(team, purpose)
+        
+        elif menu_selection == "8":
+            matches = []
+            purpose = "email"
+            connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=FINISHED', None, headers )
+            response = json.loads(connection.getresponse().read().decode())
+            for match in response["matches"]:
+                if match["competition"]["name"] == "Premier League":
+                    matches.append(match)
+            last_content = last_five(matches, requested_team, purpose)
+
+            status = "SCHEDULED"
+            connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=SCHEDULED', None, headers )
+            response = json.loads(connection.getresponse().read().decode())
+            for match in response["matches"]:
+                if match["competition"]["name"] == "Premier League":
+                    matches.append(match)
+            if len(matches) == 0:
+                status = "POSTPONED"
+                connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=POSTPONED', None, headers )
+                response = json.loads(connection.getresponse().read().decode())
+                for match in response["matches"]:
+                    if match["competition"]["name"] == "Premier League":
+                        matches.append(match)
+            if len(matches) == 0:
+                status = "CANCELLED"
+                connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=CANCELLED', None, headers )
+                response = json.loads(connection.getresponse().read().decode())
+                for match in response["matches"]:
+                    if match["competition"]["name"] == "Premier League":
+                        matches.append(match)     
+            next_content = next_five(matches, status, purpose)
+
+            connection.request('GET', f'/v2/teams/{selected_team_id}', None, headers )
+            response = json.loads(connection.getresponse().read().decode())
+            team = response
+            team_contact = team_info(team, purpose)
+            
+            newsletter(next_content, last_content, requested_team, selected_team_id, team_contact)
+
+        elif menu_selection == "9":
+            finished_matches = []
+
+            connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=POSTPONED', None, headers )
+            response = json.loads(connection.getresponse().read().decode())
+
+            for match in response["matches"]:
+                if match["competition"]["name"] == "Premier League":
+                    matches.append(match)
+            next_game = matches[0]
+            ids_names = [str(next_game["homeTeam"]["id"]), next_game["homeTeam"]["name"], str(next_game["awayTeam"]["id"]), next_game["awayTeam"]["name"]]
+            if selected_team_id == ids_names[0]:
+                home_bonus = 5
+            else:
+                home_bonus = -5
+            
+            y = 0 
+            z = 0
+
+            selected_team_id = str(selected_team_id)
+
+            for x in ids_names:
+                if x == selected_team_id:
+                    team_id = selected_team_id
+                    z = y
+                y+=1
+
+            if z == 0:
+                opp_id = ids_names[2]
+            else:
+                opp_id = ids_names[0]
+            
+            team_form = form(team_id)
+            opp_form = form(opp_id)
+            
+            connection.request('GET', '/v2/competitions/PL/standings', None, headers )
+            response = json.loads(connection.getresponse().read().decode())
+            standings = response["standings"][0]["table"]
+
+            for team in standings:
+                print(team_id)
+                print(team["team"]["id"])
+                if str(team["team"]["id"]) == team_id:
+                    print("hi")
+                    team_points = team["points"]
+                elif str(team["team"]["id"]) == opp_id:
+                    opp_points = team["points"]
+
+            team_odds_tally = home_bonus + team_form + team_points
+            opp_odds_tally = opp_form + opp_points
+
+            win_prob = team_odds_tally / (opp_odds_tally + team_odds_tally)
+            
+            if odds < 0.5:
+                american_odds = (100/win_prob) - 100
+                american_odds = round(american_odds, 0)
+                american_odds = "+" + str(american_odds)
+            else:
+                american_odds = (win_prob*100 / (1 - win_prob))*-1
+                american_odds = round(american_odds, 0)
+                american_odds = str(american_odds)
+            
+            american_odds = american_odds[:4]
+            
+            print(american_odds)
+            
+            
+            
+
+
+        menu_selection = get_menu_option()
+
+        
+
+    #pip install -U python-dotenv
