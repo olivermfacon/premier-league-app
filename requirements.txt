@@ -1,4 +1,3 @@
-sendgrid
 mailjet_rest
 requests
 http.client
