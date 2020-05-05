@@ -1,5 +1,5 @@
 import pytest # for pytest.raises (see: https://docs.pytest.org/en/latest/assert.html)
-from soccer_data import format_date, club_colors, match_info, outcome 
+from soccer_data import format_date, club_colors, match_info, outcome, get_menu_option
 #requested_team = "Arsenal FC"
 
 def test_format_date():
@@ -15,6 +15,8 @@ def test_outcome():
     assert outcome(.7) == "Given the probability of win, your team will most likely win."
     assert outcome(.5) == "Given the probability of win, your team will most likely draw."
     assert outcome(.2) == "Given the probability of win, your team will most likely lose."
+
+
 
 #def test_match_info():
     #requested_team = "Arsenal FC"
