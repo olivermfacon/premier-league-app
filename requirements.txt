@@ -1,8 +1,4 @@
-sendgrid
-mailjet_rest
 requests
-http.client
-dotenv
-json
-
+mailjet_rest
+python-dotenv
 
