@@ -72,7 +72,7 @@ def match_info(match):
     """
     Functions that returns the list called match_information. In conjunction with other function, it is used to display information about the games.
 
-    Param: match is string that holds value of a dictionary key
+    Param: match is list
 
     """
 
@@ -496,6 +496,17 @@ def form(selected_id):
         x+=1
     return form
 
+def outcome(win_prob):
+    if win_prob > .6:
+        outcome = "Given the probability of win, your team will most likely win."
+
+    elif win_prob <= .6 and win_prob >= 0.4:
+        outcome = "Given the probability of win, your team will most likely draw."
+
+    elif win_prob < .4:
+        outcome = "Given the probability of win, your team will most likely lose."
+
+    return outcome    
 
 
 #if __name__ == "__main__":
