@@ -3,3 +3,4 @@ mailjet_rest
 python-dotenv
 http.client
 pytest
+gnutls 
