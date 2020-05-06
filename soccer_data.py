@@ -68,7 +68,7 @@ def get_menu_option():
     print("8. Sign up to your club's weekly newsletter...")
     print("9. Calculate odds on next game...")
     print()
-    return input("CHOOSE AN OPTION BELOW BY ENTERING THE MENU NUMBER: ")
+    return input("CHOOSE AN OPTION BELOW BY ENTERING THE MENU NUMBER OR ENTER 'DONE' ONCE YOU ARE FINISHED: ")
 
 def match_info(match):
     """
@@ -537,21 +537,26 @@ if __name__ == "__main__":
     valid_team = False
     x=0
     while valid_team == False:
-        requested_team = input("ENTER THE NAME OF A PREMIER LEAGUE TEAM: ").lower()
+        requested_team = input("ENTER THE NAME OF A PREMIER LEAGUE TEAM AS A SHORTCUT (E.G. 'ARS') OR IN THE LONG FORM (E.G. 'ARSENAL'): ").lower()
         for team in response["teams"]:
             if requested_team == team_names[x].lower() or requested_team == short_names[x].lower() or requested_team == tla[x].lower():
                 requested_team = team_names[x].upper()
                 selected_team_id = team["id"]
                 valid_team = True
+                print()
+                print("Chosen Team: "+ requested_team)
             x += 1
         if valid_team == False:
-            print("Invalid team entry")
+            print("Invalid team entry. Please try again.")
             x = 0
     print()
     menu_selection = get_menu_option()
 
     while menu_selection!="done":
         matches = []
+
+        if menu_selection.lower() =="done":
+            break
         
         if menu_selection == "1":
             purpose = "console"
