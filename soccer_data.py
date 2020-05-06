@@ -39,7 +39,6 @@ def club_colors(selected_team_id):
     elif response["name"] == "Southampton FC":
         colors[0] = "Red"
         colors[1] = "White"
-    print(colors)
     return colors
     
 def format_date(match_date):
@@ -427,7 +426,7 @@ def divider():
 
 def newsletter(next_content, last_content, requested_team, selected_team_id, team_contact):
     color_theme = club_colors(selected_team_id)
-    usa_odds = odds_calculator(selected_team_id, "email")
+    probs_odds = odds_calculator(selected_team_id, "email")
     x = 0
     last_body = "<b><u>THE LAST FIVE GAMES</u></b><br/><br/>"
     next_body = "<b><u>THE NEXT FIVE GAMES</u></b><br/><br/>"
@@ -452,7 +451,11 @@ def newsletter(next_content, last_content, requested_team, selected_team_id, tea
                     <div>
                         <h1 style="color:{color_theme[1]};background-color:{color_theme[0]};font-size:30px;border:3px;border-style:solid;border-color:{color_theme[1]};">ODDS ON NEXT GAME</h1>
                         <p style="font-size:16px;">{next_content[1]}</p>
-                        <p style="font-size:16px;">{usa_odds}</p>
+                        <p style="font-size:20px;">{probs_odds[3]}</p>
+                        <p style="font-size:16px;"><b>THE PERCENTAGES</b></p>
+                        <p style="font-size:16px;">Win: {probs_odds[0]}%</p>
+                        <p style="font-size:16px;">Draw: {probs_odds[1]}%</p>
+                        <p style="font-size:16px;">Loss: {probs_odds[2]}%</p>
                     </div>
                 </body>
                 <footer style="font-family:'Verdana';text-align:center;color:{color_theme[0]};background-color:{color_theme[1]};">
@@ -496,8 +499,9 @@ def form(selected_id):
         selected_id(string) holds value of a id of the requested team
 
     """
+    wdl_form = [0,0,0,0]
     finished_matches = []
-    connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=FINISHED', None, headers )
+    connection.request('GET', f'/v2/teams/{selected_id}/matches?status=FINISHED', None, headers )
     response = json.loads(connection.getresponse().read().decode())
 
     for match in response["matches"]:
@@ -506,21 +510,24 @@ def form(selected_id):
 
     num_games = len(finished_matches)
     x=1
-    form = 0
-    while(x<6):
+    while(x<11):
         #if team won the game, it gets 9 points
-        if finished_matches[num_games-x]["score"]["winner"] == "HOME_TEAM" and finished_matches[num_games-x]["homeTeam"]["id"] == selected_id:
-            form += 9
-        elif finished_matches[num_games-x]["score"]["winner"] == "AWAY_TEAM" and finished_matches[num_games-x]["awayTeam"]["id"] == selected_id:
-            form += 9
+        if finished_matches[num_games-x]["score"]["winner"] == "HOME_TEAM" and str(finished_matches[num_games-x]["homeTeam"]["id"]) == selected_id:
+            wdl_form[0] += 1
+            wdl_form[3] += 9
+        elif finished_matches[num_games-x]["score"]["winner"] == "AWAY_TEAM" and str(finished_matches[num_games-x]["awayTeam"]["id"]) == selected_id:
+            wdl_form[0] += 1
+            wdl_form[3] += 9
         #if team drew the game, it gets 3 points
-        elif finished_matches[num_games-x]["score"]["winner"] == "None":
-            form += 3
+        elif finished_matches[num_games-x]["score"]["winner"] == "DRAW":
+            wdl_form[1] += 1
+            wdl_form[3] += 3
+        else:
+            wdl_form[2] += 1
         x+=1
-    return form
+    return wdl_form
 
 def odds_calculator(selected_team_id, purpose):
-    finished_matches = []
     connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=POSTPONED', None, headers )
     response = json.loads(connection.getresponse().read().decode())
     for match in response["matches"]:
@@ -529,9 +536,9 @@ def odds_calculator(selected_team_id, purpose):
     next_game = matches[0]
     ids_names = [str(next_game["homeTeam"]["id"]), next_game["homeTeam"]["name"], str(next_game["awayTeam"]["id"]), next_game["awayTeam"]["name"]]
     if selected_team_id == ids_names[0]:
-        home_bonus = 5
+        home_bonus = 10
     else:
-        home_bonus = -5
+        home_bonus = -10
     
     y = 0 
     z = 0
@@ -545,7 +552,7 @@ def odds_calculator(selected_team_id, purpose):
         opp_id = ids_names[2]
     else:
         opp_id = ids_names[0]
-    
+
     team_form = form(team_id)
     opp_form = form(opp_id)
     
@@ -557,24 +564,32 @@ def odds_calculator(selected_team_id, purpose):
             team_points = team["points"]
         elif str(team["team"]["id"]) == opp_id:
             opp_points = team["points"]
-    team_odds_tally = home_bonus + team_form + team_points
-    opp_odds_tally = opp_form + opp_points
-    win_prob = team_odds_tally / (opp_odds_tally + team_odds_tally)
-    
-    if win_prob < 0.5:
-        american_odds = (100/win_prob) - 100
+    team_odds_tally = home_bonus + team_form[3] + team_points
+    opp_odds_tally = opp_form[3] + opp_points
+    probability = team_odds_tally / (opp_odds_tally + team_odds_tally)
+    if probability < 0.5:
+        american_odds = (100/probability) - 100
         american_odds = round(american_odds, 0)
         american_odds = "+" + str(american_odds)
     else:
-        american_odds = (win_prob*100 / (1 - win_prob))*-1
+        american_odds = (probability*100 / (1 - probability))*-1
         american_odds = round(american_odds, 0)
         american_odds = str(american_odds)
     
     american_odds = american_odds[:4]
     if purpose == "console":
-        print(f"American Odds on next game: {american_odds}")
+        print(f"\nAmerican Odds on next game: {american_odds}\n")
     elif purpose == "email":
-        return american_odds
+        probs_and_odds = result_probs(team_form, opp_form)
+        probs_and_odds.append(american_odds)
+        return probs_and_odds
+
+def result_probs(team_form, opp_form):
+    num_games = 20
+    win_prob = str(round(((team_form[0]/num_games) + (opp_form[2]/num_games))*100,0))
+    draw_prob = str(round(((team_form[1]/num_games) + (opp_form[1]/num_games))*100,0))
+    loss_prob = str(round(((team_form[2]/num_games) + (opp_form[0]/num_games))*100,0))
+    return [win_prob, draw_prob, loss_prob]
 
 def outcome(win_prob):
     if win_prob > .6:
@@ -732,7 +747,6 @@ if __name__ == "__main__":
                 for match in response["matches"]:
                     if match["competition"]["name"] == "Premier League":
                         matches.append(match)     
-            print(matches)
             next_content = next_five(matches, status, purpose)
             connection.request('GET', f'/v2/teams/{selected_team_id}', None, headers )
             response = json.loads(connection.getresponse().read().decode())
