@@ -1,20 +1,15 @@
 import pytest # for pytest.raises (see: https://docs.pytest.org/en/latest/assert.html)
-import os
 from soccer_data import format_date, club_colors, match_info, outcome, get_menu_option
 #requested_team = "Arsenal FC"
-
-CI_ENV = os.environ.get("CI") == "true"
-
-@pytest.mark.skipif(CI_ENV==True, reason="to avoid issuing HTTP requests on the CI server") # skips this 
 
 def test_format_date():
     # it should apply USD formatting
     assert format_date("2019-08-11T13:45:00Z") == "2019-08-11"
 
 
-def test_club_colors():
+#def test_club_colors():
 
-    assert club_colors("65") == ["#1CC6E8", "White"]
+    #assert club_colors("65") == ["Red", "Blue"]
 
 def test_outcome():
     assert outcome(.7) == "Given the probability of win, your team will most likely win."
