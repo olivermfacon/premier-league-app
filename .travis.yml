@@ -6,6 +6,5 @@ install:
   - pip install -r requirements.txt
 script:
   - pytest
-env:
-  #FOOTY_API_KEY="3d0a31585ed447b2899c048748e26386"
+
   
