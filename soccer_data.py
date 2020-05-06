@@ -12,6 +12,7 @@ def club_colors(selected_team_id):
     Param: selected_team_id
 
     """
+    
     colors = []
     basic_colors = ["Red", "Blue", "Green", "Yellow"]
     connection.request('GET', f'/v2/teams/{selected_team_id}', None, headers )
@@ -67,7 +68,7 @@ def get_menu_option():
     print("8. Sign up to your club's weekly newsletter...")
     print("9. Calculate odds on next game...")
     print()
-    return input("CHOOSE AN OPTION BELOW BY ENTERING THE MENU NUMBER: ")
+    return input("CHOOSE AN OPTION BELOW BY ENTERING THE MENU NUMBER OR ENTER 'DONE' ONCE YOU ARE FINISHED: ")
 
 def match_info(match):
     """
@@ -411,6 +412,16 @@ def team_info(team, purpose):
             team_contacts.append(team["email"])
         return team_contacts
 
+def divider():
+    """
+    Returns a divider for displaying purposes.
+
+    Example: divider()
+
+    Returns: ---------------------------------------------
+    """
+    return "---------------------------------------------"
+
 def newsletter(next_content, last_content, requested_team, selected_team_id, team_contact):
     color_theme = club_colors(selected_team_id)
     x = 0
@@ -524,9 +535,9 @@ if __name__ == "__main__":
     connection.request('GET', '/v2/competitions/PL/teams', None, headers )
     response = json.loads(connection.getresponse().read().decode())
 
-    print("---------------------------------------------")
+    print(divider())
     print("SOCCER TEAM PROGRESS TRACKER (Premier League)")
-    print("---------------------------------------------")
+    print(divider())
     y = 1
     for team in response["teams"]:
         y += 1
@@ -536,21 +547,26 @@ if __name__ == "__main__":
     valid_team = False
     x=0
     while valid_team == False:
-        requested_team = input("ENTER THE NAME OF A PREMIER LEAGUE TEAM: ").lower()
+        requested_team = input("ENTER THE NAME OF A PREMIER LEAGUE TEAM AS A SHORTCUT (E.G. 'ARS') OR IN THE LONG FORM (E.G. 'ARSENAL'): ").lower()
         for team in response["teams"]:
             if requested_team == team_names[x].lower() or requested_team == short_names[x].lower() or requested_team == tla[x].lower():
                 requested_team = team_names[x].upper()
                 selected_team_id = team["id"]
                 valid_team = True
+                print()
+                print("Chosen Team: "+ requested_team)
             x += 1
         if valid_team == False:
-            print("Invalid team entry")
+            print("Invalid team entry. Please try again.")
             x = 0
     print()
     menu_selection = get_menu_option()
 
     while menu_selection!="done":
         matches = []
+
+        if menu_selection.lower() =="done":
+            break
         
         if menu_selection == "1":
             purpose = "console"
