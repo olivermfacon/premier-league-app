@@ -35,7 +35,10 @@ def club_colors(selected_team_id):
     elif response["name"] == "West Ham United FC":
         colors[1] = "#7A263A"
         colors[0] = "#1BB1E7"
-
+    elif response["name"] == "Southampton FC":
+        colors[0] = "Red"
+        colors[1] = "White"
+    print(colors)
     return colors
     
 def format_date(match_date):
