@@ -510,20 +510,20 @@ def outcome(win_prob):
     return outcome    
 
 
-#if __name__ == "__main__":
-
-team_names = []
-short_names = []
-tla = []
-
-load_dotenv()
-
-api_key = os.environ.get("FOOTY_API_KEY")
-connection = http.client.HTTPConnection('api.football-data.org') #https://www.football-data.org/documentation/samples
-headers = { 'X-Auth-Token': api_key } 
-connection.request('GET', '/v2/competitions/PL/teams', None, headers )
-response = json.loads(connection.getresponse().read().decode())
 if __name__ == "__main__":
+
+    team_names = []
+    short_names = []
+    tla = []
+
+    load_dotenv()
+
+    api_key = os.environ.get("FOOTY_API_KEY")
+    connection = http.client.HTTPConnection('api.football-data.org') #https://www.football-data.org/documentation/samples
+    headers = { 'X-Auth-Token': api_key } 
+    connection.request('GET', '/v2/competitions/PL/teams', None, headers )
+    response = json.loads(connection.getresponse().read().decode())
+
     print("---------------------------------------------")
     print("SOCCER TEAM PROGRESS TRACKER (Premier League)")
     print("---------------------------------------------")
