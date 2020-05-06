@@ -661,7 +661,7 @@ if __name__ == "__main__":
     valid_team = False
     x=0
     while valid_team == False:
-        requested_team = input("ENTER THE NAME OF A PREMIER LEAGUE TEAM AS A SHORTCUT (E.G. 'ARS') OR IN THE LONG FORM (E.G. 'ARSENAL'): ").lower()
+        requested_team = input("ENTER THE NAME OF A PREMIER LEAGUE TEAM AS A SHORTCUT (E.G. 'WHU') OR IN THE LONG FORM (E.G. 'WEST HAM'): ").lower()
         for team in response["teams"]:
             if requested_team == team_names[x].lower() or requested_team == short_names[x].lower() or requested_team == tla[x].lower():
                 requested_team = team_names[x].upper()
