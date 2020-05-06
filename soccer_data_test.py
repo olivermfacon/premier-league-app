@@ -19,12 +19,11 @@ def test_outcome():
     assert outcome(.2) == "Given the probability of win, your team will most likely lose."
 
 
-#@pytest.mark.skipif(CI_ENV==True, reason="to avoid issuing HTTP requests on the CI server")
-#def test_match_info():
-    #home_Team = "ARSENAL FC"
-    #match = {'score': {'winner': 'AWAY_TEAM', 'duration': 'REGULAR', 'fullTime': {'homeTeam': 0, 'awayTeam': 1}, 'homeTeam': {'id': 67, 'name': 'Newcastle United FC'}, 'awayTeam': {'id': 57, 'name': 'Arsenal FC'}}}
-    #match_information = match_info(match)
-    #assert match_information == ["Newcastle", 2]
+
+def test_match_info():
+    match = {'score': {'winner': 'AWAY_TEAM'}, 'homeTeam': {'id': 67, 'name': 'Newcastle United FC'}, 'awayTeam': {'id': 57, 'name': 'Arsenal FC'}}
+    assert match_info((match),"Arsenal")== ["Newcastle United FC", "ARSENAL FC", "LOSS"]
+
 
 
 def test_divider():

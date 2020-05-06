@@ -70,7 +70,7 @@ def get_menu_option():
     print()
     return input("CHOOSE AN OPTION BELOW BY ENTERING THE MENU NUMBER OR ENTER 'DONE' ONCE YOU ARE FINISHED: ")
 
-def match_info(match):
+def match_info(match,requested_team):
     """
     Functions that returns the list called match_information. In conjunction with other function, it is used to display information about the games.
 
@@ -165,7 +165,7 @@ def last_five(matches, requested_team, purpose):
     while(x > 0):
         match_date = matches[finished_games - x]["utcDate"]
         match_date = format_date(match_date)
-        match_information = match_info(matches[finished_games - x])
+        match_information = match_info(matches[finished_games - x], requested_team)
         matchday_info = "(" + match_date + ") Matchday " + str(matches[finished_games - x]["matchday"]) + " - " + match_information[2]
         matchday_score = "\t" + match_information[0] + " " + str(matches[finished_games - x]["score"]["fullTime"]["homeTeam"]) + " vs " + match_information[1] + " " + str(matches[finished_games - x]["score"]["fullTime"]["awayTeam"])
         if purpose == "console":
@@ -210,7 +210,7 @@ def whole_season(matches, requested_team):
         match_date = match["utcDate"]
         match_date = format_date(match_date)
         if match["status"] == "FINISHED":
-            match_information = match_info(match)
+            match_information = match_info(match,requested_team)
             print("(" + match_date + ") Matchday " + str(match["matchday"]) + " - " + match_information[2])
             print("\t" + match_information[0] + " " + str(match["score"]["fullTime"]["homeTeam"]) + " vs " + match_information[1] + " " + str(match["score"]["fullTime"]["awayTeam"]))
         else:
