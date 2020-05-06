@@ -9,16 +9,6 @@ def test_format_date():
     assert format_date("2019-08-11T13:45:00Z") == "2019-08-11"
 
 
-#def test_club_colors():
-
-    #assert club_colors("65") == ["Red", "Blue"]
-
-def test_outcome():
-    assert outcome(.7) == "Given the probability of win, your team will most likely win."
-    assert outcome(.5) == "Given the probability of win, your team will most likely draw."
-    assert outcome(.2) == "Given the probability of win, your team will most likely lose."
-
-
 def test_result_probs():
     assert result_probs([100,20,10],[100,10,10]) == [42,12,46]
 
@@ -26,8 +16,6 @@ def test_result_probs():
 def test_match_info():
     match = {'score': {'winner': 'AWAY_TEAM'}, 'homeTeam': {'id': 67, 'name': 'Newcastle United FC'}, 'awayTeam': {'id': 57, 'name': 'Arsenal FC'}}
     assert match_info((match),"Arsenal")== ["Newcastle United FC", "ARSENAL FC", "LOSS"]
-
-
 
 def test_divider():
     #it should return the divider/line

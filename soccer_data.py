@@ -237,7 +237,7 @@ def whole_season(matches, requested_team):
         x += 1
     print()
 
-def prem_table(standings, selected_team_id):
+def prem_table(selected_team_id, purpose):
     """
     Function that displays requested team position in the league.
 
@@ -251,22 +251,32 @@ def prem_table(standings, selected_team_id):
         -----------------------------
 
         1.	Liverpool FC (82pts)
-        2.	---> MANCHESTER CITY FC <--- (57pts)
-        3.	Leicester City FC (53pts)s
+        2.	MANCHESTER CITY FC (57pts)
+        3.	Leicester City FC (53pts)
     """
 
+    table = ""
 
-    print()
-    print("-----------------------------")
-    print("LIVE PREMIER LEAGUE STANDINGS")
-    print("-----------------------------")
-    print()
+    connection.request('GET', '/v2/competitions/PL/standings', None, headers )
+    response = json.loads(connection.getresponse().read().decode())
+    standings = response["standings"][0]["table"]
+    if purpose == "console":
+        print()
+        print("-----------------------------")
+        print("LIVE PREMIER LEAGUE STANDINGS")
+        print("-----------------------------")
+        print()
     for team in standings:
         if team["team"]["id"] == selected_team_id:
-            print(str(team["position"]) + ".\t---> " + team["team"]["name"].upper() + " <--- (" + str(team["points"]) + "pts)")
+            pos = str(team["position"]) + ".\t" + team["team"]["name"].upper() + " (" + str(team["points"]) + "pts)"
         else:
-            print(str(team["position"]) + ".\t" + team["team"]["name"] + " (" + str(team["points"]) + "pts)")
+            pos = str(team["position"]) + ".\t" + team["team"]["name"] + " (" + str(team["points"]) + "pts)"
+        if purpose == "console":
+            print(pos)
+        else:
+            table += pos + "<br/>"
     print()
+    return table
 
 def display_squad(squad):
     """
@@ -347,8 +357,7 @@ def season_statistics(team_stats):
             Goals Conceded: 31
             Goal Difference: 37
     """
-
-
+    season_stats = []
     win_percentage = (team_stats["won"]/team_stats["playedGames"])*100
     if team_stats["position"] == 1:
         place = "st"
@@ -430,9 +439,16 @@ def divider():
     return "---------------------------------------------"
 
 def newsletter(next_content, last_content, requested_team, selected_team_id, team_contact):
-    receiver_email = input("Please enter your email address: ")
+    valid_email = False
+    while valid_email == False:
+        receiver_email = input("Please enter your email address: ")
+        if '@' in receiver_email:
+            valid_email = True
+        else:
+            print("Invalid email address. Please try again!")
     color_theme = club_colors(selected_team_id)
     probs_odds = odds_calculator(selected_team_id, "email")
+    premier_table = prem_table(selected_team_id, "email")
     x = 0
     last_body = "<b><u>THE LAST FIVE GAMES</u></b><br/><br/>"
     next_body = "<b><u>THE NEXT FIVE GAMES</u></b><br/><br/>"
@@ -451,16 +467,19 @@ def newsletter(next_content, last_content, requested_team, selected_team_id, tea
                 <body style="font-family:'Verdana';text-align:center;color:{color_theme[0]};background-color:{color_theme[1]};">
                     <div>
                         <h1 style="color:{color_theme[1]};background-color:{color_theme[0]};font-size:30px;border:3px;border-style:solid;border-color:{color_theme[1]};">{requested_team}<br/>NEWSLETTER</h1>
-                        <p style="font-size:13px;">{last_body}</p>
-                        <p style="font-size:13px;">{next_body}</p>
+                        <p style="font-size:16px;">{last_body}</p>
+                        <p style="font-size:16px;">{next_body}</p>
                     </div>
                     <div>
                         <h1 style="color:{color_theme[1]};background-color:{color_theme[0]};font-size:30px;border:3px;border-style:solid;border-color:{color_theme[1]};">ODDS ON NEXT GAME</h1>
-                        <p style="font-size:20px;"><b>{next_content[1]}</b></p>
-                        <p style="font-size:20px;">American: {probs_odds[3]} &emsp; Decimal: {probs_odds[4]} &emsp; European: {probs_odds[5]}</p>
+                        <p style="font-size:16px;"><b>{next_content[1]}</b></p>
+                        <p style="font-size:16px;">American: {probs_odds[3]} &emsp; Decimal: {probs_odds[4]} &emsp; European: {probs_odds[5]}</p>
                         <p style="font-size:16px;"><b>THE PERCENTAGES</b></p>
                         <p style="font-size:16px;">Win: {probs_odds[0]}% &emsp; Draw: {probs_odds[1]}% &emsp; Loss: {probs_odds[2]}%</p>
-                        
+                    </div>
+                    <div>
+                        <h1 style="color:{color_theme[1]};background-color:{color_theme[0]};font-size:30px;border:3px;border-style:solid;border-color:{color_theme[1]};">PREMIER LEAGUE TABLE</h1>
+                        <p style="font-size:16px;">{premier_table}</p>
                     </div>
                 </body>
                 <footer style="font-family:'Verdana';text-align:center;color:{color_theme[0]};background-color:{color_theme[1]};">
@@ -486,16 +505,14 @@ def newsletter(next_content, last_content, requested_team, selected_team_id, tea
             "Name": ""
             }
         ],
-        "Subject": "Premier League Newsletter",
+        "Subject": f"{requested_team} NEWSLETTER",
         "TextPart": "",
         "HTMLPart": message,
         "CustomID": "Team Newsletter"
         }
     ]
     }
-    result = mailjet.send.create(data=data)
-    print(result.status_code)
-    print(result.json())
+    mailjet.send.create(data=data)
 
 def form(selected_id):
     """
@@ -593,10 +610,18 @@ def odds_calculator(selected_team_id, purpose):
     else:
         fractional_odds = Fraction(int(american_odds), 100)
 
+    probs_and_odds = result_probs(team_form, opp_form)
+
     if purpose == "console":
-        print(f"\nAmerican Odds on next game: {american_odds}\n")
+        print("\nODDS:")
+        print(f"\n\tAmerican Odds: {american_odds}")
+        print(f"\tDecimal Odds: {decimal_odds}")
+        print(f"\tEuropean Odds: {fractional_odds}\n")
+        print(f"PERCENTAGES:\n")
+        print(f"\tWin: {probs_and_odds[0]}%")
+        print(f"\tDraw: {probs_and_odds[1]}%")
+        print(f"\tLoss: {probs_and_odds[2]}%\n")
     elif purpose == "email":
-        probs_and_odds = result_probs(team_form, opp_form)
         probs_and_odds.append(american_odds)
         probs_and_odds.append(decimal_odds)
         probs_and_odds.append(fractional_odds)
@@ -608,20 +633,7 @@ def result_probs(team_form, opp_form):
     draw_prob = round(((team_form[1] + opp_form[1])/num_games)*100,0)
     loss_prob = 100 - win_prob - draw_prob
     
-    return [win_prob, draw_prob, loss_prob]
-
-def outcome(win_prob):
-    if win_prob > .6:
-        outcome = "Given the probability of win, your team will most likely win."
-
-    elif win_prob <= .6 and win_prob >= 0.4:
-        outcome = "Given the probability of win, your team will most likely draw."
-
-    elif win_prob < .4:
-        outcome = "Given the probability of win, your team will most likely lose."
-
-    return outcome    
-
+    return [win_prob, draw_prob, loss_prob]   
 
 if __name__ == "__main__":
 
@@ -668,6 +680,7 @@ if __name__ == "__main__":
         matches = []
 
         if menu_selection.lower() =="done":
+            print("Thank you for using the Premier League Application!\n")
             break
         
         if menu_selection == "1":
@@ -708,12 +721,9 @@ if __name__ == "__main__":
                 if match["competition"]["name"] == "Premier League":
                     matches.append(match)
             whole_season(matches, requested_team)
-        
         elif menu_selection == "4":
-            connection.request('GET', '/v2/competitions/PL/standings', None, headers )
-            response = json.loads(connection.getresponse().read().decode())
-            standings = response["standings"][0]["table"]
-            prem_table(standings,selected_team_id)
+            purpose = "console"
+            prem_table(selected_team_id, purpose)
         elif menu_selection == "5":
             connection.request('GET', f'/v2/teams/{selected_team_id}', None, headers )
             response = json.loads(connection.getresponse().read().decode())
@@ -728,7 +738,6 @@ if __name__ == "__main__":
                 if team["team"]["name"].upper() == requested_team:
                     season_statistics(table[x])
                 x += 1
-            
         elif menu_selection == "7":
             purpose = "console"
             connection.request('GET', f'/v2/teams/{selected_team_id}', None, headers )
