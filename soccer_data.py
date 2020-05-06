@@ -430,6 +430,7 @@ def divider():
     return "---------------------------------------------"
 
 def newsletter(next_content, last_content, requested_team, selected_team_id, team_contact):
+    receiver_email = input("Please enter your email address: ")
     color_theme = club_colors(selected_team_id)
     probs_odds = odds_calculator(selected_team_id, "email")
     x = 0
@@ -470,17 +471,18 @@ def newsletter(next_content, last_content, requested_team, selected_team_id, tea
             </html>"""
     email_api_key = os.environ.get("API_KEY")
     api_secret = os.environ.get("API_SECRET")
+    sender_address = os.environ.get("MY_EMAIL_ADDRESS")
     mailjet = Client(auth=(email_api_key, api_secret), version='v3.1')
     data = {
     'Messages': [
         {
         "From": {
-            "Email": "omf11@georgetown.edu",
+            "Email": sender_address,
             "Name": "Oliver"
         },
         "To": [
             {
-            "Email": "omf11@georgetown.edu",
+            "Email": receiver_email,
             "Name": "Oliver"
             }
         ],
@@ -494,8 +496,6 @@ def newsletter(next_content, last_content, requested_team, selected_team_id, tea
     result = mailjet.send.create(data=data)
     print(result.status_code)
     print(result.json())
-    #<p style="font-size:16px;">Draw: {probs_odds[1]}%</p>
-    #<p style="font-size:16px;">Loss: {probs_odds[2]}%</p>
 
 def form(selected_id):
     """
