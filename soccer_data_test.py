@@ -1,6 +1,6 @@
 import pytest # for pytest.raises (see: https://docs.pytest.org/en/latest/assert.html)
 #import os
-from soccer_data import format_date, club_colors, match_info, outcome, get_menu_option, divider, result_probs
+from soccer_data import format_date, match_info, get_menu_option, divider, result_probs
 
 #CI_ENV = os.environ.get("CI") == "true"
 
