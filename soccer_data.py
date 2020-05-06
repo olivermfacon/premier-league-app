@@ -427,6 +427,7 @@ def divider():
 
 def newsletter(next_content, last_content, requested_team, selected_team_id, team_contact):
     color_theme = club_colors(selected_team_id)
+    usa_odds = odds_calculator(selected_team_id, "email")
     x = 0
     last_body = "<b><u>THE LAST FIVE GAMES</u></b><br/><br/>"
     next_body = "<b><u>THE NEXT FIVE GAMES</u></b><br/><br/>"
@@ -443,9 +444,16 @@ def newsletter(next_content, last_content, requested_team, selected_team_id, tea
         footer_para += f"<div>Email: {team_contact[3]}</div>"
     message = f"""<html>
                 <body style="font-family:'Verdana';text-align:center;color:{color_theme[0]};background-color:{color_theme[1]};">
-                    <h1 style="color:{color_theme[1]};background-color:{color_theme[0]};font-size:30px;border:3px;border-style:solid;border-color:{color_theme[1]};">{requested_team}<br/>NEWSLETTER</h1>
-                    <p style="font-size:13px;">{last_body}</p>
-                    <p style="font-size:13px;">{next_body}</p>
+                    <div>
+                        <h1 style="color:{color_theme[1]};background-color:{color_theme[0]};font-size:30px;border:3px;border-style:solid;border-color:{color_theme[1]};">{requested_team}<br/>NEWSLETTER</h1>
+                        <p style="font-size:13px;">{last_body}</p>
+                        <p style="font-size:13px;">{next_body}</p>
+                    </div>
+                    <div>
+                        <h1 style="color:{color_theme[1]};background-color:{color_theme[0]};font-size:30px;border:3px;border-style:solid;border-color:{color_theme[1]};">ODDS ON NEXT GAME</h1>
+                        <p style="font-size:16px;">{next_content[1]}</p>
+                        <p style="font-size:16px;">{usa_odds}</p>
+                    </div>
                 </body>
                 <footer style="font-family:'Verdana';text-align:center;color:{color_theme[0]};background-color:{color_theme[1]};">
                     <p><u>Contact your Team</u></p>
@@ -488,7 +496,7 @@ def form(selected_id):
         selected_id(string) holds value of a id of the requested team
 
     """
-
+    finished_matches = []
     connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=FINISHED', None, headers )
     response = json.loads(connection.getresponse().read().decode())
 
@@ -510,6 +518,63 @@ def form(selected_id):
             form += 3
         x+=1
     return form
+
+def odds_calculator(selected_team_id, purpose):
+    finished_matches = []
+    connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=POSTPONED', None, headers )
+    response = json.loads(connection.getresponse().read().decode())
+    for match in response["matches"]:
+        if match["competition"]["name"] == "Premier League":
+            matches.append(match)
+    next_game = matches[0]
+    ids_names = [str(next_game["homeTeam"]["id"]), next_game["homeTeam"]["name"], str(next_game["awayTeam"]["id"]), next_game["awayTeam"]["name"]]
+    if selected_team_id == ids_names[0]:
+        home_bonus = 5
+    else:
+        home_bonus = -5
+    
+    y = 0 
+    z = 0
+    selected_team_id = str(selected_team_id)
+    for x in ids_names:
+        if x == selected_team_id:
+            team_id = selected_team_id
+            z = y
+        y+=1
+    if z == 0:
+        opp_id = ids_names[2]
+    else:
+        opp_id = ids_names[0]
+    
+    team_form = form(team_id)
+    opp_form = form(opp_id)
+    
+    connection.request('GET', '/v2/competitions/PL/standings', None, headers )
+    response = json.loads(connection.getresponse().read().decode())
+    standings = response["standings"][0]["table"]
+    for team in standings:
+        if str(team["team"]["id"]) == team_id:
+            team_points = team["points"]
+        elif str(team["team"]["id"]) == opp_id:
+            opp_points = team["points"]
+    team_odds_tally = home_bonus + team_form + team_points
+    opp_odds_tally = opp_form + opp_points
+    win_prob = team_odds_tally / (opp_odds_tally + team_odds_tally)
+    
+    if win_prob < 0.5:
+        american_odds = (100/win_prob) - 100
+        american_odds = round(american_odds, 0)
+        american_odds = "+" + str(american_odds)
+    else:
+        american_odds = (win_prob*100 / (1 - win_prob))*-1
+        american_odds = round(american_odds, 0)
+        american_odds = str(american_odds)
+    
+    american_odds = american_odds[:4]
+    if purpose == "console":
+        print(f"American Odds on next game: {american_odds}")
+    elif purpose == "email":
+        return american_odds
 
 def outcome(win_prob):
     if win_prob > .6:
@@ -638,14 +703,15 @@ if __name__ == "__main__":
             team_info(team, purpose)
         
         elif menu_selection == "8":
+            finished_matches = []
             matches = []
             purpose = "email"
             connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=FINISHED', None, headers )
             response = json.loads(connection.getresponse().read().decode())
             for match in response["matches"]:
                 if match["competition"]["name"] == "Premier League":
-                    matches.append(match)
-            last_content = last_five(matches, requested_team, purpose)
+                    finished_matches.append(match)
+            last_content = last_five(finished_matches, requested_team, purpose)
             status = "SCHEDULED"
             connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=SCHEDULED', None, headers )
             response = json.loads(connection.getresponse().read().decode())
@@ -666,6 +732,7 @@ if __name__ == "__main__":
                 for match in response["matches"]:
                     if match["competition"]["name"] == "Premier League":
                         matches.append(match)     
+            print(matches)
             next_content = next_five(matches, status, purpose)
             connection.request('GET', f'/v2/teams/{selected_team_id}', None, headers )
             response = json.loads(connection.getresponse().read().decode())
@@ -674,62 +741,8 @@ if __name__ == "__main__":
             
             newsletter(next_content, last_content, requested_team, selected_team_id, team_contact)
         elif menu_selection == "9":
-            finished_matches = []
-            connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=POSTPONED', None, headers )
-            response = json.loads(connection.getresponse().read().decode())
-            for match in response["matches"]:
-                if match["competition"]["name"] == "Premier League":
-                    matches.append(match)
-            next_game = matches[0]
-            ids_names = [str(next_game["homeTeam"]["id"]), next_game["homeTeam"]["name"], str(next_game["awayTeam"]["id"]), next_game["awayTeam"]["name"]]
-            if selected_team_id == ids_names[0]:
-                home_bonus = 5
-            else:
-                home_bonus = -5
-            
-            y = 0 
-            z = 0
-            selected_team_id = str(selected_team_id)
-            for x in ids_names:
-                if x == selected_team_id:
-                    team_id = selected_team_id
-                    z = y
-                y+=1
-            if z == 0:
-                opp_id = ids_names[2]
-            else:
-                opp_id = ids_names[0]
-            
-            team_form = form(team_id)
-            opp_form = form(opp_id)
-            
-            connection.request('GET', '/v2/competitions/PL/standings', None, headers )
-            response = json.loads(connection.getresponse().read().decode())
-            standings = response["standings"][0]["table"]
-            for team in standings:
-                print(team_id)
-                print(team["team"]["id"])
-                if str(team["team"]["id"]) == team_id:
-                    print("hi")
-                    team_points = team["points"]
-                elif str(team["team"]["id"]) == opp_id:
-                    opp_points = team["points"]
-            team_odds_tally = home_bonus + team_form + team_points
-            opp_odds_tally = opp_form + opp_points
-            win_prob = team_odds_tally / (opp_odds_tally + team_odds_tally)
-            
-            if win_prob < 0.5:
-                american_odds = (100/win_prob) - 100
-                american_odds = round(american_odds, 0)
-                american_odds = "+" + str(american_odds)
-            else:
-                american_odds = (win_prob*100 / (1 - win_prob))*-1
-                american_odds = round(american_odds, 0)
-                american_odds = str(american_odds)
-            
-            american_odds = american_odds[:4]
-            
-            print(american_odds)
+            purpose = "console"
+            odds_calculator(selected_team_id, purpose)
             
             
         
