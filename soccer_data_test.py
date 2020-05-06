@@ -7,9 +7,9 @@ def test_format_date():
     assert format_date("2019-08-11T13:45:00Z") == "2019-08-11"
 
 
-#def test_club_colors():
+def test_club_colors():
 
-    #assert club_colors("65") == ["Red", "Blue"]
+    assert club_colors("65") == ["#1CC6E8", "White"]
 
 def test_outcome():
     assert outcome(.7) == "Given the probability of win, your team will most likely win."
