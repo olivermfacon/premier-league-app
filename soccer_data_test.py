@@ -1,6 +1,6 @@
 import pytest # for pytest.raises (see: https://docs.pytest.org/en/latest/assert.html)
 #import os
-from soccer_data import format_date, club_colors, match_info, outcome, get_menu_option, divider
+from soccer_data import format_date, club_colors, match_info, outcome, get_menu_option, divider, result_probs
 
 #CI_ENV = os.environ.get("CI") == "true"
 
@@ -18,6 +18,9 @@ def test_outcome():
     assert outcome(.5) == "Given the probability of win, your team will most likely draw."
     assert outcome(.2) == "Given the probability of win, your team will most likely lose."
 
+
+def test_result_probs():
+    assert result_probs([100,20,10],[100,10,10]) == [42,12,46]
 
 
 def test_match_info():
