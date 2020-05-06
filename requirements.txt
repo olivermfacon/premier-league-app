@@ -2,4 +2,3 @@ requests
 mailjet_rest
 python-dotenv
 pytest
-python-http.client
