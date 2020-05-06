@@ -1,6 +1,6 @@
 import pytest # for pytest.raises (see: https://docs.pytest.org/en/latest/assert.html)
 #import os
-from soccer_data import format_date, club_colors, match_info, outcome, get_menu_option
+from soccer_data import format_date, club_colors, match_info, outcome, get_menu_option, divider
 
 #CI_ENV = os.environ.get("CI") == "true"
 
@@ -27,3 +27,6 @@ def test_outcome():
     #assert match_information == ["Newcastle", 2]
 
 
+def test_divider():
+    #it should return the divider/line
+    assert divider() == "---------------------------------------------"

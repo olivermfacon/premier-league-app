@@ -412,6 +412,16 @@ def team_info(team, purpose):
             team_contacts.append(team["email"])
         return team_contacts
 
+def divider():
+    """
+    Returns a divider for displaying purposes.
+
+    Example: divider()
+
+    Returns: ---------------------------------------------
+    """
+    return "---------------------------------------------"
+
 def newsletter(next_content, last_content, requested_team, selected_team_id, team_contact):
     color_theme = club_colors(selected_team_id)
     x = 0
@@ -525,9 +535,9 @@ if __name__ == "__main__":
     connection.request('GET', '/v2/competitions/PL/teams', None, headers )
     response = json.loads(connection.getresponse().read().decode())
 
-    print("---------------------------------------------")
+    print(divider())
     print("SOCCER TEAM PROGRESS TRACKER (Premier League)")
-    print("---------------------------------------------")
+    print(divider())
     y = 1
     for team in response["teams"]:
         y += 1
