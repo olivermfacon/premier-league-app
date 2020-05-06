@@ -6,35 +6,35 @@ from mailjet_rest import Client
 from dotenv import load_dotenv
 
 def club_colors(selected_team_id):
-    #"""
-    #Returns the colors based on the id of the team. The color is later used in the newsletter so that fans receive the email in the colors of their favorite team.
-#
-    #Param: selected_team_id
-#
-    #"""
-    #basic_colors = ["Red", "Blue", "Green", "Yellow"]
-    colors = ["Red", "Blue"]
-    #connection.request('GET', f'/v2/teams/{selected_team_id}', None, headers )
-    #response = json.loads(connection.getresponse().read().decode())
-    #color = response["clubColors"]
-    #y=0
-    #for char in color:
-    #    if char == '/':
-    #        colors.append(color[:y-1])
-    #        colors.append(color[y+2:])
-    #    y+=1
-    #for color in basic_colors:
-    #    if color in colors[0]:
-    #        colors[0] = color
-    #    if color in colors[1]:
-    #        colors[1] = color
-    #if response["name"] == "Manchester City FC":
-    #    colors[0] = "#1CC6E8"
-    #elif response["name"] == "Wolverhampton Wanderers FC":
-    #    colors[1] = "#FDB913"
-    #elif response["name"] == "West Ham United FC":
-    #    colors[1] = "#7A263A"
-    #    colors[0] = "#1BB1E7"
+    """
+    Returns the colors based on the id of the team. The color is later used in the newsletter so that fans receive the email in the colors of their favorite team.
+
+    Param: selected_team_id
+
+    """
+    colors = []
+    basic_colors = ["Red", "Blue", "Green", "Yellow"]
+    connection.request('GET', f'/v2/teams/{selected_team_id}', None, headers )
+    response = json.loads(connection.getresponse().read().decode())
+    color = response["clubColors"]
+    y=0
+    for char in color:
+        if char == '/':
+            colors.append(color[:y-1])
+            colors.append(color[y+2:])
+        y+=1
+    for color in basic_colors:
+        if color in colors[0]:
+            colors[0] = color
+        if color in colors[1]:
+            colors[1] = color
+    if response["name"] == "Manchester City FC":
+        colors[0] = "#1CC6E8"
+    elif response["name"] == "Wolverhampton Wanderers FC":
+        colors[1] = "#FDB913"
+    elif response["name"] == "West Ham United FC":
+        colors[1] = "#7A263A"
+        colors[0] = "#1BB1E7"
 
     return colors
     
@@ -429,7 +429,7 @@ def newsletter(next_content, last_content, requested_team, selected_team_id, tea
         footer_para += f"<div>Email: {team_contact[3]}</div>"
     message = f"""<html>
                 <body style="font-family:'Verdana';text-align:center;color:{color_theme[0]};background-color:{color_theme[1]};">
-                    <h1 style="color:{color_theme[1]};background-color:{color_theme[0]};font-size:30px;border:3px;border-style:solid;border-color:{color_theme[1]};">{requested_team} NEWSLETTER</h1>
+                    <h1 style="color:{color_theme[1]};background-color:{color_theme[0]};font-size:30px;border:3px;border-style:solid;border-color:{color_theme[1]};">{requested_team}<br/>NEWSLETTER</h1>
                     <p style="font-size:13px;">{last_body}</p>
                     <p style="font-size:13px;">{next_body}</p>
                 </body>
@@ -455,7 +455,7 @@ def newsletter(next_content, last_content, requested_team, selected_team_id, tea
             "Name": "Oliver"
             }
         ],
-        "Subject": "Premier League Team",
+        "Subject": "Premier League Newsletter",
         "TextPart": "",
         "HTMLPart": message,
         "CustomID": "Team Newsletter"
@@ -548,6 +548,7 @@ if __name__ == "__main__":
             x = 0
     print()
     menu_selection = get_menu_option()
+
     while menu_selection!="done":
         matches = []
         
@@ -698,7 +699,7 @@ if __name__ == "__main__":
             opp_odds_tally = opp_form + opp_points
             win_prob = team_odds_tally / (opp_odds_tally + team_odds_tally)
             
-            if odds < 0.5:
+            if win_prob < 0.5:
                 american_odds = (100/win_prob) - 100
                 american_odds = round(american_odds, 0)
                 american_odds = "+" + str(american_odds)
@@ -712,10 +713,9 @@ if __name__ == "__main__":
             print(american_odds)
             
             
-                
+        
 
-
-            menu_selection = get_menu_option()
+        menu_selection = get_menu_option()
 
         
 
