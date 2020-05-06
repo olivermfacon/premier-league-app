@@ -7,5 +7,5 @@ install:
 script:
   - pytest
 env:
-  FOOTY_API_KEY="3d0a31585ed447b2899c048748e26386"
-  headers = { 'X-Auth-Token': api_key }
+  #FOOTY_API_KEY="3d0a31585ed447b2899c048748e26386"
+  
