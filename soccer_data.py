@@ -244,6 +244,7 @@ def prem_table(selected_team_id, purpose):
     Params: 
         standings(list) contains all information about season table.
         selected_team_id(string) holds value of a id of the requested team
+        purpose(string) like "console"
 
     Example of table displayed when the user chooses Manchester City:
         -----------------------------
@@ -439,6 +440,16 @@ def divider():
     return "---------------------------------------------"
 
 def newsletter(next_content, last_content, requested_team, selected_team_id, team_contact):
+    """
+    Function that sends newsletters to the user.
+
+    Params: 
+        next_content: list of the next 5 games 
+        last_content: list of the last 5 games 
+        requested_team: the user's favorite team
+        selected_team_id = id of the team
+        team_contact: list of contacts for the team
+    """
     valid_email = False
     while valid_email == False:
         receiver_email = input("Please enter your email address: ")
@@ -554,6 +565,13 @@ def form(selected_id):
     return wdl_form
 
 def odds_calculator(selected_team_id, purpose):
+    """
+    Function that calculates the odds of the upcoming game.
+
+    Params: 
+        selected_team_id = id of the team
+        purpose: to determine if function is used for newsletter or console
+    """
     connection.request('GET', f'/v2/teams/{selected_team_id}/matches?status=POSTPONED', None, headers )
     response = json.loads(connection.getresponse().read().decode())
     for match in response["matches"]:
@@ -628,6 +646,13 @@ def odds_calculator(selected_team_id, purpose):
         return probs_and_odds
 
 def result_probs(team_form, opp_form):
+    """
+    Function that calculates the win/draw/loss probabilities of the next game.
+
+    Params: 
+        team_form = the form of the favorite team in the season so far
+        opp_form = the form of the opposition team in the season so far
+    """
     num_games = (team_form[0] + team_form[1] + team_form[2])*2
     win_prob = round(((team_form[0] + opp_form[2])/num_games)*100,0)
     draw_prob = round(((team_form[1] + opp_form[1])/num_games)*100,0)
