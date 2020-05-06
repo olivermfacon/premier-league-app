@@ -12,6 +12,17 @@ def club_colors(selected_team_id):
     Param: selected_team_id
 
     """
+    team_names = []
+    short_names = []
+    tla = []
+
+    load_dotenv()
+
+    api_key = os.environ.get("FOOTY_API_KEY")
+    connection = http.client.HTTPConnection('api.football-data.org') #https://www.football-data.org/documentation/samples
+    headers = { 'X-Auth-Token': api_key } 
+    connection.request('GET', '/v2/competitions/PL/teams', None, headers )
+    response = json.loads(connection.getresponse().read().decode())
     colors = []
     basic_colors = ["Red", "Blue", "Green", "Yellow"]
     connection.request('GET', f'/v2/teams/{selected_team_id}', None, headers )
