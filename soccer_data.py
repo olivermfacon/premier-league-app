@@ -524,6 +524,7 @@ connection.request('GET', '/v2/competitions/PL/teams', None, headers )
 response = json.loads(connection.getresponse().read().decode())
 
 if __name__ == "__main__":
+    api_key = os.environ.get("FOOTY_API_KEY")
     print("---------------------------------------------")
     print("SOCCER TEAM PROGRESS TRACKER (Premier League)")
     print("---------------------------------------------")
