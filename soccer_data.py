@@ -5,6 +5,8 @@ import requests
 from mailjet_rest import Client
 from dotenv import load_dotenv
 
+
+
 def club_colors(selected_team_id):
     """
     Returns the colors based on the id of the team. The color is later used in the newsletter so that fans receive the email in the colors of their favorite team.
@@ -524,7 +526,6 @@ connection.request('GET', '/v2/competitions/PL/teams', None, headers )
 response = json.loads(connection.getresponse().read().decode())
 
 if __name__ == "__main__":
-    api_key = os.environ.get("FOOTY_API_KEY")
     print("---------------------------------------------")
     print("SOCCER TEAM PROGRESS TRACKER (Premier League)")
     print("---------------------------------------------")

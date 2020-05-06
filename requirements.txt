@@ -1,5 +1,5 @@
 requests
 mailjet_rest
 python-dotenv
-python-http.client
+python_http.client
 
