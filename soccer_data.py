@@ -478,12 +478,12 @@ def newsletter(next_content, last_content, requested_team, selected_team_id, tea
         {
         "From": {
             "Email": sender_address,
-            "Name": "Oliver"
+            "Name": "Premier League Newsletter"
         },
         "To": [
             {
             "Email": receiver_email,
-            "Name": "Oliver"
+            "Name": ""
             }
         ],
         "Subject": "Premier League Newsletter",
